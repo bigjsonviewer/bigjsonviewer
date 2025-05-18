@@ -3,10 +3,11 @@
 // import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
 import {JsonViewer} from "./components/JsonViewer.tsx";
-import {AppContext} from "./context.tsx";
-import {useState} from "react";
+import {AppContext, useAppContext} from "./context.tsx";
+import {FC, useContext, useMemo, useState} from "react";
 import {RawViewer} from "./components/RawViewer.tsx";
 import {cn} from "./lib/utils.ts";
+
 // import {testData} from "./components/data2.ts";
 
 
@@ -14,19 +15,18 @@ function App() {
 
     const [jsonRaw, setJsonRaw] = useState('');
 
+
     return (
         <AppContext.Provider value={{
             jsonRaw,
             setJsonRaw,
         }}>
             <div className={cn(
-                'w-screen h-screen flex',
+                'w-screen h-screen flex flex-col',
             )}>
-                <div className='w-[500px] h-full'>
-                    <RawViewer/>
-                </div>
+                <Header/>
                 <div className='flex-1 h-full'>
-                    <JsonViewer/>
+                    {!!jsonRaw ? <JsonViewer/> : <NoData/>}
                 </div>
             </div>
         </AppContext.Provider>
@@ -34,3 +34,29 @@ function App() {
 }
 
 export default App;
+
+const Header: FC = () => {
+    const {jsonRaw} = useAppContext();
+
+    const jsonRawSize = useMemo(() => {
+        return new Blob([jsonRaw]).size;
+    }, [jsonRaw])
+
+    return <div className='flex justify-between items-center p-2 border-b border-gray-200'>
+        <strong>Big JSON Viewer</strong>
+        <div className='flex gap-2 items-center'>
+            <span>
+                size:
+                {jsonRawSize}
+            </span>
+            <RawViewer/>
+
+        </div>
+    </div>
+
+}
+
+
+const NoData: FC = () => {
+    return <div className='h-full flex items-center justify-center'>No Data</div>
+}

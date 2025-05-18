@@ -1428,6 +1428,11 @@ postcss@^8.5.3:
     picocolors "^1.1.1"
     source-map-js "^1.2.1"
 
+pretty-bytes@^7.0.0:
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/pretty-bytes/-/pretty-bytes-7.0.0.tgz#8652cbf0aa81daeeaf72802e0fd059e5e1046cdb"
+  integrity sha512-U5otLYPR3L0SVjHGrkEUx5mf7MxV2ceXeE7VwWPk+hyzC5drNohsOGNPDZqxCqyX1lkbEN4kl1LiI8QFd7r0ZA==
+
 prop-types@^15.6.2:
   version "15.8.1"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.8.1.tgz#67d87bf1a694f48435cf332c24af10214a3140b5"

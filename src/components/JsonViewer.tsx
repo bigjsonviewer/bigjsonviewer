@@ -4,6 +4,7 @@ import {Virtuoso} from "react-virtuoso";
 // import {Message} from "@arco-design/web-react";
 import {cn} from "../lib/utils.ts";
 import data from './result.json';
+import {AppContext} from "../context.tsx";
 
 // type DataNode = {
 //     key: string;
@@ -14,7 +15,10 @@ import data from './result.json';
 
 
 export const JsonViewer: FC = () => {
-    // const {jsonRaw} = useContext(AppContext);
+    const {jsonRaw} = useContext(AppContext);
+    return <pre>
+        {jsonRaw}
+    </pre>
     // const [renderData, setRenderData] = useState<DataNode[]>([]);
     // useEffect(() => {
     //     if (!jsonRaw) {
@@ -30,26 +34,27 @@ export const JsonViewer: FC = () => {
     //     }
     // }, [jsonRaw]);
 
-    const steps: {
-        pc: number,
-        op: number,
-    }[] = (data as {
-        steps: {
-            pc: number,
-            op: number,
-        }[]
-    }).steps;
-
-
-    return <Virtuoso
-        className={'h-full'}
-        data={steps}
-        itemContent={(_, node) => (
-            <div className={cn(
-                'h-[45px] whitespace-nowrap overflow-hidden',
-            )}>
-                {node.pc} - {JSON.stringify(node.op)}
-            </div>
-        )}
-    />
+    // const steps: {
+    //     pc: number,
+    //     op: number,
+    // }[] = (data as {
+    //     steps: {
+    //         pc: number,
+    //         op: number,
+    //     }[]
+    // }).steps;
+    //
+    //
+    //
+    // return <Virtuoso
+    //     className={'h-full'}
+    //     data={steps}
+    //     itemContent={(_, node) => (
+    //         <div className={cn(
+    //             'h-[45px] whitespace-nowrap overflow-hidden',
+    //         )}>
+    //             {node.pc} - {JSON.stringify(node.op)}
+    //         </div>
+    //     )}
+    // />
 }

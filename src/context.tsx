@@ -1,4 +1,4 @@
-import {createContext, Dispatch, SetStateAction} from "react";
+import {createContext, Dispatch, SetStateAction, useContext} from "react";
 
 
 export type AppContextProps = {
@@ -8,6 +8,11 @@ export type AppContextProps = {
 
 export const AppContext = createContext<AppContextProps>({
     jsonRaw: "",
-    setJsonRaw: () => {}
+    setJsonRaw: () => {
+    }
 });
 
+
+export const useAppContext = () => {
+    return useContext(AppContext);
+}
