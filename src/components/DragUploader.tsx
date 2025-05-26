@@ -1,8 +1,8 @@
 import {FC, ReactNode, useState} from 'react';
 import type {UploadProps} from 'antd';
-import {message, Upload} from 'antd';
+import {Upload} from 'antd';
 import {cn} from "../lib/utils.ts";
-import {useAppContext} from "../context.tsx";
+import {isArray} from 'lodash';
 
 const {Dragger} = Upload;
 
@@ -34,7 +34,6 @@ export const DragUploader: FC<{
     children?: ReactNode
 }> = ({children}) => {
     const [dragging, setDragging] = useState(false);
-    const {setJsonRaw} = useAppContext()
     return (
         <div className={cn(
             'h-full',
@@ -62,7 +61,9 @@ export const DragUploader: FC<{
                 }
                 void (async () => {
                     const text = await file.text();
-                    console.log('text:', JSON.parse(text))
+                    const obj = JSON.parse(text)
+                    console.log('raw:', obj)
+                    console.log('walk:', walkValue(obj))
                 })()
             }}>
                 {children}
@@ -74,3 +75,86 @@ export const DragUploader: FC<{
     )
 
 }
+
+export enum JType {
+    Null,
+    Object,
+    Array,
+    String,
+    Number,
+    Boolean,
+    Unknown,
+}
+
+export type JValue = {
+    name?: string;
+    type: JType;
+    repeated?: boolean;
+    value?: unknown;
+    children?: JValue[];
+    elems?: JValue[];
+}
+
+const walkValue = (obj: unknown): JValue => {
+
+    const v: JValue = {
+        type: checkType(obj),
+    }
+
+    switch (v.type) {
+        case JType.Object: {
+            v.children = []
+            for (const key in obj as object) {
+                const vv = walkValue((obj as Record<string, unknown>)[key]);
+                vv.name = key;
+                v.children.push(vv);
+            }
+            break
+        }
+        case JType.Array: {
+            v.repeated = true;
+            v.elems = [];
+            (obj as unknown[]).forEach((item: unknown) => {
+                const vv = walkValue(item);
+                v.elems!.push(vv);
+            })
+            break
+        }
+        case JType.String:
+        case JType.Number:
+        case JType.Boolean:
+        case JType.Null: {
+            v.value = obj;
+            break
+        }
+    }
+
+    return v;
+
+}
+
+
+const checkType = (value: unknown): JType => {
+    if (value === null) {
+        return JType.Null
+    }
+    if (Array.isArray(value)) {
+        return JType.Array
+    }
+    if (typeof value === 'object') {
+        return JType.Object
+    }
+    if (typeof value === 'string') {
+        return JType.String
+    }
+    if (typeof value === 'number') {
+        return JType.Number
+    }
+    if (typeof value === 'boolean') {
+        return JType.Boolean
+    }
+    return JType.Unknown
+}
+
+
+
