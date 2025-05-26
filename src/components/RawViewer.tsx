@@ -1,7 +1,7 @@
 import {FC, useContext, useState} from "react";
-import {Alert, Button, Input, Modal} from "@arco-design/web-react";
 import {AppContext} from "../context.tsx";
-import {IconClose} from "@arco-design/web-react/icon";
+import {Alert, Button, Input, Modal} from "antd";
+import {ClockCircleFilled} from "@ant-design/icons";
 
 export const RawViewer: FC = () => {
     const [visible, setVisible] = useState(false);
@@ -27,21 +27,18 @@ const JsonInputModal: FC<{
     const [displayRaw, setDisplayRaw] = useState('');
     return <Modal
         title='Input JSON'
-        visible={visible}
+        open={visible}
         onOk={() => setVisible(false)}
         onCancel={() => setVisible(false)}
-        autoFocus={false}
-        focusLock={true}
-        alignCenter={false}
         style={{top: 120, width: '80%'}}
     >
         {showAlert && <div className={'absolute z-20'}>
             <Alert
-                action={<IconClose onClick={() => {
+                action={<ClockCircleFilled onClick={() => {
                     setShowAlert(false);
                 }}/>}
                 type='warning'
-                content='When the source code is too long, it will be truncated for display to improve performance.'
+                message='When the source code is too long, it will be truncated for display to improve performance.'
             />
         </div>}
         <Input.TextArea
@@ -56,8 +53,8 @@ const JsonInputModal: FC<{
             //     event.stopPropagation()
             // }}
             onChange={value => {
-                setJsonRaw(value)
-                let data = value;
+                setJsonRaw(value.currentTarget.value)
+                let data = value.currentTarget.value;
                 if (data.length > 1200) {
                     setShowAlert(true);
                     data = data.slice(0, 1200) + '...'

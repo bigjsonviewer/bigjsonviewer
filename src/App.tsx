@@ -7,13 +7,14 @@ import {AppContext, useAppContext} from "./context.tsx";
 import {FC, useContext, useMemo, useState} from "react";
 import {RawViewer} from "./components/RawViewer.tsx";
 import {cn} from "./lib/utils.ts";
+import {DragUploader} from "./components/DragUploader.tsx";
 
 // import {testData} from "./components/data2.ts";
 
 
 function App() {
 
-    const [jsonRaw, setJsonRaw] = useState('');
+    const [jsonRaw, setJsonRaw] = useState(`{"name":"tom","age":18"}`);
 
 
     return (
@@ -26,7 +27,9 @@ function App() {
             )}>
                 <Header/>
                 <div className='flex-1 h-full'>
-                    {!!jsonRaw ? <JsonViewer/> : <NoData/>}
+                    <DragUploader>
+                        {!!jsonRaw ? <JsonViewer/> : <NoData/>}
+                    </DragUploader>
                 </div>
             </div>
         </AppContext.Provider>
