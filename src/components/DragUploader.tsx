@@ -2,6 +2,8 @@ import {FC, ReactNode, useState} from 'react';
 import type {UploadProps} from 'antd';
 import {Upload} from 'antd';
 import {cn} from "../lib/utils.ts";
+import {JValue, walkValue} from "./types.ts";
+import {useAppContext} from "../context.tsx";
 
 const {Dragger} = Upload;
 
@@ -33,10 +35,19 @@ export const DragUploader: FC<{
     children?: ReactNode
 }> = ({children}) => {
     const [dragging, setDragging] = useState(false);
+    const {setJValues} = useAppContext()
     return (
         <div className={cn(
             'h-full',
-            '[&_.ant-upload-btn]:!cursor-default'
+            '[&_.ant-upload-btn]:!cursor-default',
+            '[&_.ant-upload-btn]:!block',
+            '[&_.ant-upload-btn]:!w-full',
+            '[&_.ant-upload-btn]:!h-full',
+            '[&_.ant-upload-btn]:!p-0',
+            '[&_.ant-upload-drag-container]:!block',
+            '[&_.ant-upload-drag-container]:!w-full',
+            '[&_.ant-upload-drag-container]:!h-full',
+            '[&_.ant-upload-drag-container]:!text-left',
         )}
              onDragEnter={() => {
                  setDragging(true)
@@ -62,7 +73,10 @@ export const DragUploader: FC<{
                     const text = await file.text();
                     const obj = JSON.parse(text)
                     console.log('raw:', obj)
-                    console.log('walk:', walkValue(obj))
+                    const list: JValue[] = [];
+                    walkValue(obj, 0, list);
+                    console.log('walk:', list);
+                    setJValues(list);
                 })()
             }}>
                 {children}
@@ -74,86 +88,4 @@ export const DragUploader: FC<{
     )
 
 }
-
-export enum JType {
-    Null,
-    Object,
-    Array,
-    String,
-    Number,
-    Boolean,
-    Unknown,
-}
-
-export type JValue = {
-    name?: string;
-    type: JType;
-    repeated?: boolean;
-    value?: unknown;
-    children?: JValue[];
-    elems?: JValue[];
-}
-
-const walkValue = (obj: unknown): JValue => {
-
-    const v: JValue = {
-        type: checkType(obj),
-    }
-
-    switch (v.type) {
-        case JType.Object: {
-            v.children = []
-            for (const key in obj as object) {
-                const vv = walkValue((obj as Record<string, unknown>)[key]);
-                vv.name = key;
-                v.children.push(vv);
-            }
-            break
-        }
-        case JType.Array: {
-            v.repeated = true;
-            v.elems = [];
-            (obj as unknown[]).forEach((item: unknown) => {
-                const vv = walkValue(item);
-                v.elems!.push(vv);
-            })
-            break
-        }
-        case JType.String:
-        case JType.Number:
-        case JType.Boolean:
-        case JType.Null: {
-            v.value = obj;
-            break
-        }
-    }
-
-    return v;
-
-}
-
-
-const checkType = (value: unknown): JType => {
-    if (value === null) {
-        return JType.Null
-    }
-    if (Array.isArray(value)) {
-        return JType.Array
-    }
-    if (typeof value === 'object') {
-        return JType.Object
-    }
-    if (typeof value === 'string') {
-        return JType.String
-    }
-    if (typeof value === 'number') {
-        return JType.Number
-    }
-    if (typeof value === 'boolean') {
-        return JType.Boolean
-    }
-    return JType.Unknown
-}
-
-
 

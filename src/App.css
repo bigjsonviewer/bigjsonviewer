@@ -4,3 +4,17 @@ body {
     @apply w-screen h-screen;
     overflow: hidden;
 }
+
+.ant-upload-drag-container .tree-indent-unit {
+    position: relative;
+    height: 100%;
+}
+
+.ant-upload-drag-container .tree-indent-unit::before {
+    position: absolute;
+    top: 0;
+    inset-inline-end: 12px;
+    bottom: -4px;
+    border-inline-end: 1px dashed #b7b7b7;
+    content: "";
+}

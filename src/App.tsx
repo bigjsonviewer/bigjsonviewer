@@ -4,10 +4,11 @@
 import "./App.css";
 import {JsonViewer} from "./components/JsonViewer.tsx";
 import {AppContext, useAppContext} from "./context.tsx";
-import {FC, useContext, useMemo, useState} from "react";
+import {FC, useMemo, useState} from "react";
 import {RawViewer} from "./components/RawViewer.tsx";
 import {cn} from "./lib/utils.ts";
 import {DragUploader} from "./components/DragUploader.tsx";
+import {JValue} from "./components/types.ts";
 
 // import {testData} from "./components/data2.ts";
 
@@ -15,12 +16,18 @@ import {DragUploader} from "./components/DragUploader.tsx";
 function App() {
 
     const [jsonRaw, setJsonRaw] = useState(`{"name":"tom","age":18"}`);
+    const [jValues, setJValues] = useState<JValue[]>([]);
+    const [showDepth, setShowDepth] = useState(-1);
 
 
     return (
         <AppContext.Provider value={{
             jsonRaw,
             setJsonRaw,
+            jValues,
+            setJValues,
+            showDepth,
+            setShowDepth,
         }}>
             <div className={cn(
                 'w-screen h-screen flex flex-col',
