@@ -1,19 +1,22 @@
-import {FC} from "react";
+import {FC, useMemo} from "react";
 import {Virtuoso} from "react-virtuoso";
 import {cn} from "../lib/utils.ts";
 import {useAppContext} from "../context.tsx";
 import {JType, JValue} from "./types.ts";
-import {CaretRightOutlined, RightOutlined} from "@ant-design/icons";
+import {RightOutlined} from "@ant-design/icons";
 
 
 export const JsonViewer: FC = () => {
 
-    const {jValues} = useAppContext();
+    const {jValues, showDepth} = useAppContext();
 
+    const renderItems = useMemo(() => {
+        return jValues.filter(v => showDepth === -1 || v.depth <= showDepth);
+    }, [jValues, showDepth])
 
     return <Virtuoso<JValue>
         className={'h-full min-h-[300px] min-w-[500px]'}
-        data={jValues}
+        data={renderItems}
         itemContent={(_, node) => renderItem(node)}
     />
 }

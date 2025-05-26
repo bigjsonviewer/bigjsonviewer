@@ -17,7 +17,7 @@ function App() {
 
     const [jsonRaw, setJsonRaw] = useState(`{"name":"tom","age":18"}`);
     const [jValues, setJValues] = useState<JValue[]>([]);
-    const [showDepth, setShowDepth] = useState(-1);
+    const [showDepth, setShowDepth] = useState(1);
 
 
     return (
