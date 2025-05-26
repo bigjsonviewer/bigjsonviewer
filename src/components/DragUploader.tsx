@@ -74,7 +74,7 @@ export const DragUploader: FC<{
                     const obj = JSON.parse(text)
                     console.log('raw:', obj)
                     const list: JValue[] = [];
-                    walkValue(obj, 0, list);
+                    walkValue(undefined, obj, 0, list);
                     console.log('walk:', list);
                     setJValues(list);
                 })()

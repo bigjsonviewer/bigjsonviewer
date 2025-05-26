@@ -8,6 +8,11 @@ export enum JType {
     Unknown,
 }
 
+export enum JSeparator {
+    ObjectEnd,
+    ArrayEnd,
+}
+
 export type JValue = {
     name?: string;
     type: JType;
@@ -17,10 +22,13 @@ export type JValue = {
     elems?: JValue[];
     raw: unknown;
     depth: number;
+    parent?: JValue;
+    separator?: JSeparator;
 }
 
-export const walkValue = (obj: unknown, depth: number, list: JValue[]): JValue => {
+export const walkValue = (parent: JValue | undefined, obj: unknown, depth: number, list: JValue[]): JValue => {
     const v: JValue = {
+        parent,
         depth,
         type: checkType(obj),
         raw: obj,
@@ -31,19 +39,29 @@ export const walkValue = (obj: unknown, depth: number, list: JValue[]): JValue =
         case JType.Object: {
             v.children = []
             for (const key in obj as object) {
-                const vv = walkValue((obj as Record<string, unknown>)[key], depth + 1, list);
+                const vv = walkValue(v, (obj as Record<string, unknown>)[key], depth + 1, list);
                 vv.name = key;
                 v.children.push(vv);
             }
+            const separator = {
+                ...v,
+                separator: JSeparator.ObjectEnd,
+            }
+            list.push(separator)
             break
         }
         case JType.Array: {
             v.repeated = true;
             v.elems = [];
             (obj as unknown[]).forEach((item: unknown) => {
-                const vv = walkValue(item, depth + 1, list);
+                const vv = walkValue(v, item, depth + 1, list);
                 v.elems!.push(vv);
             })
+            const separator = {
+                ...v,
+                separator: JSeparator.ArrayEnd,
+            }
+            list.push(separator)
             break
         }
         case JType.String:
