@@ -2,7 +2,6 @@ import {FC, ReactNode, useState} from 'react';
 import type {UploadProps} from 'antd';
 import {Upload} from 'antd';
 import {cn} from "../lib/utils.ts";
-import {isArray} from 'lodash';
 
 const {Dragger} = Upload;
 
