@@ -35,7 +35,7 @@ export const DragUploader: FC<{
     children?: ReactNode
 }> = ({children}) => {
     const [dragging, setDragging] = useState(false);
-    const {setJValues} = useAppContext()
+    const {setJValues, setRawSize} = useAppContext()
     return (
         <div className={cn(
             'h-full',
@@ -48,6 +48,9 @@ export const DragUploader: FC<{
             '[&_.ant-upload-drag-container]:!w-full',
             '[&_.ant-upload-drag-container]:!h-full',
             '[&_.ant-upload-drag-container]:!text-left',
+            '[&_.ant-upload-drag]:!rounded-none',
+            '[&_.ant-upload-drag]:!border-0',
+            '[&_.ant-upload-drag]:!bg-transparent',
         )}
              onDragEnter={() => {
                  setDragging(true)
@@ -64,7 +67,6 @@ export const DragUploader: FC<{
         >
             <Dragger {...props} onDrop={(e) => {
                 setDragging(false);
-                console.log('Dropped files', e.dataTransfer.files);
                 const file = e.dataTransfer.files.item(0);
                 if (!file) {
                     return
@@ -72,11 +74,10 @@ export const DragUploader: FC<{
                 void (async () => {
                     const text = await file.text();
                     const obj = JSON.parse(text)
-                    console.log('raw:', obj)
                     const list: JValue[] = [];
                     walkValue(undefined, obj, 0, list);
-                    console.log('walk:', list);
                     setJValues(list);
+                    setRawSize(new Blob([text]).size)
                 })()
             }}>
                 {children}

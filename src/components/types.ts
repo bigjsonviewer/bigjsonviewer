@@ -9,11 +9,12 @@ export enum JType {
 }
 
 export enum JSeparator {
-    ObjectEnd,
+    ObjectEnd = 1,
     ArrayEnd,
 }
 
 export type JValue = {
+    id: number;
     name?: string;
     type: JType;
     repeated?: boolean;
@@ -26,14 +27,26 @@ export type JValue = {
     separator?: JSeparator;
 }
 
+const addSeparator = (list: JValue[], node: JValue, separator: JSeparator) => {
+    list.push({
+        ...node,
+        separator,
+        id: list.length + 1,
+        depth: node.depth + 1,
+        parent: node,
+    })
+    return
+}
 export const walkValue = (parent: JValue | undefined, obj: unknown, depth: number, list: JValue[]): JValue => {
     const v: JValue = {
+        id: list.length + 1,
         parent,
         depth,
         type: checkType(obj),
         raw: obj,
     }
     list.push(v);
+
 
     switch (v.type) {
         case JType.Object: {
@@ -43,11 +56,7 @@ export const walkValue = (parent: JValue | undefined, obj: unknown, depth: numbe
                 vv.name = key;
                 v.children.push(vv);
             }
-            const separator = {
-                ...v,
-                separator: JSeparator.ObjectEnd,
-            }
-            list.push(separator)
+            addSeparator(list, v, JSeparator.ObjectEnd)
             break
         }
         case JType.Array: {
@@ -57,11 +66,7 @@ export const walkValue = (parent: JValue | undefined, obj: unknown, depth: numbe
                 const vv = walkValue(v, item, depth + 1, list);
                 v.elems!.push(vv);
             })
-            const separator = {
-                ...v,
-                separator: JSeparator.ArrayEnd,
-            }
-            list.push(separator)
+            addSeparator(list, v, JSeparator.ArrayEnd)
             break
         }
         case JType.String:

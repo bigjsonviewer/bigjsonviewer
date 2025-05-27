@@ -3,25 +3,17 @@ import {JValue} from "./components/types.ts";
 
 
 export type AppContextProps = {
-    jsonRaw: string;
-    setJsonRaw: Dispatch<SetStateAction<string>>;
+    rawSize: number;
+    setRawSize: Dispatch<SetStateAction<number>>;
     jValues: JValue[];
     setJValues: Dispatch<SetStateAction<JValue[]>>;
     showDepth: number;
     setShowDepth: Dispatch<SetStateAction<number>>;
+    expandKeys: Map<number, boolean>;
+    setExpandKeys: Dispatch<SetStateAction<Map<number, boolean>>>;
 }
 
-export const AppContext = createContext<AppContextProps>({
-    jsonRaw: "",
-    setJsonRaw: () => {
-    },
-    jValues: [],
-    setJValues: () => {
-    },
-    showDepth: -1,
-    setShowDepth: () => {
-    }
-});
+export const AppContext = createContext<AppContextProps>({} as AppContextProps);
 
 
 export const useAppContext = () => {
