@@ -1,5 +1,4 @@
-import {FC, useContext, useState} from "react";
-import {AppContext} from "../context.tsx";
+import {FC, useState} from "react";
 import {Alert, Button, Input, Modal} from "antd";
 import {ClockCircleFilled} from "@ant-design/icons";
 
@@ -23,7 +22,6 @@ const JsonInputModal: FC<{
 
 }> = ({visible, setVisible}) => {
     const [showAlert, setShowAlert] = useState(false);
-    const {setJsonRaw} = useContext(AppContext);
     const [displayRaw, setDisplayRaw] = useState('');
     return <Modal
         title='Input JSON'
@@ -53,7 +51,7 @@ const JsonInputModal: FC<{
             //     event.stopPropagation()
             // }}
             onChange={value => {
-                setJsonRaw(value.currentTarget.value)
+                // setJsonRaw(value.currentTarget.value)
                 let data = value.currentTarget.value;
                 if (data.length > 1200) {
                     setShowAlert(true);

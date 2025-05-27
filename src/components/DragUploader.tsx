@@ -35,7 +35,7 @@ export const DragUploader: FC<{
     children?: ReactNode
 }> = ({children}) => {
     const [dragging, setDragging] = useState(false);
-    const {setJValues, setRawSize} = useAppContext()
+    const {setJValues, setRawSize, setMaxDepth} = useAppContext()
     return (
         <div className={cn(
             'h-full',
@@ -75,9 +75,11 @@ export const DragUploader: FC<{
                     const text = await file.text();
                     const obj = JSON.parse(text)
                     const list: JValue[] = [];
-                    walkValue(undefined, obj, 0, list);
+                    const maxDepth = {maxDepth: 0}
+                    walkValue(undefined, obj, 0, list, maxDepth);
                     setJValues(list);
-                    setRawSize(new Blob([text]).size)
+                    setRawSize(new Blob([text]).size);
+                    setMaxDepth(maxDepth.maxDepth);
                 })()
             }}>
                 {children}

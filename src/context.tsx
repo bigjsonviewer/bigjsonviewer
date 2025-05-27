@@ -5,6 +5,8 @@ import {JValue} from "./components/types.ts";
 export type AppContextProps = {
     rawSize: number;
     setRawSize: Dispatch<SetStateAction<number>>;
+    maxDepth: number;
+    setMaxDepth: Dispatch<SetStateAction<number>>;
     jValues: JValue[];
     setJValues: Dispatch<SetStateAction<JValue[]>>;
     showDepth: number;

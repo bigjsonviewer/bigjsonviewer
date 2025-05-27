@@ -4,14 +4,20 @@ import {cn} from "../lib/utils.ts";
 import {useAppContext} from "../context.tsx";
 import {JSeparator, JType, JValue} from "./types.ts";
 import {DownOutlined, RightOutlined} from "@ant-design/icons";
-import {Tag} from "antd";
+import {Tag, Typography} from "antd";
 
 
 const calcExpand = (expandKeys: Map<number, boolean>, node: JValue): boolean => {
-    if (node.parent && expandKeys.has(node.parent.id)) {
-        return expandKeys.get(node.parent.id)!
+    let expand = true;
+    let parent = node.parent;
+    while (parent) {
+        if (!expandKeys.get(parent.id)) {
+            expand = false;
+            break;
+        }
+        parent = parent.parent;
     }
-    return !node.parent;
+    return expand
 }
 
 export const JsonViewer: FC = () => {
@@ -26,6 +32,7 @@ export const JsonViewer: FC = () => {
     return <Virtuoso<JValue>
         className={'h-full min-h-[300px] min-w-[500px]'}
         data={renderItems}
+
         itemContent={(_, node) => renderItem(node)}
     />
 }
@@ -70,7 +77,7 @@ const RenderSeparator: FC<{ node: JValue }> = ({node}) => {
 const RenderValue: FC<{
     node: JValue
 }> = ({node}) => {
-    const {expandKeys, setExpandKeys} = useAppContext();
+    const {expandKeys, setExpandKeys, showDepth} = useAppContext();
 
     const expanded = !!expandKeys.get(node.id);
 
@@ -83,23 +90,33 @@ const RenderValue: FC<{
             }
             return new Map<number, boolean>(prev);
         })
-    }, [setExpandKeys])
+    }, [setExpandKeys, showDepth])
 
     return <div className='h-full flex flex-1 items-center'>
         {[JType.Object, JType.Array].includes(node.type) && <div className='cursor-pointer' onClick={() => {
             toggle(node);
         }}>{expanded ? <DownOutlined/> : <RightOutlined/>}</div>}
         <div
-            className='h-full flex flex-1 ml-2 px-2 items-center justify-between border rounded border-transparent hover:border-blue-400'>
-            <div className='flex gap-3'>
+            className={cn(
+                'h-full flex flex-1 ml-2 px-2 items-center justify-between border rounded border-transparent hover:border-blue-400',
+                '[&:hover_.copy]:visible',
+            )}>
+            <div className='flex flex-1 gap-3 '>
                 {node.name && <span>{node.name}: </span>}
                 {node.value as string && <span>{node.value as string}</span>}
                 {node.type === JType.Object && <ObjectStartSigns toggle={toggle} node={node} expanded={expanded}/>}
                 {node.type === JType.Array && <ArrayStartSigns toggle={toggle} node={node} expanded={expanded}/>}
             </div>
-            <div>
-                {node.children && <span>{node.children.length} fields</span>}
-                {node.elems && <span>{node.elems.length} elems</span>}
+            <div className={cn(
+                'flex items-center gap-2',
+            )}>
+                {node.children && <span>{node.children.length} items</span>}
+                {node.elems && <span>{node.elems.length} items</span>}
+                <span className='copy invisible'>
+                    <Typography.Text copyable={{
+                        text: () => JSON.stringify(node.raw, null, 2)
+                    }}/>
+                </span>
             </div>
         </div>
     </div>

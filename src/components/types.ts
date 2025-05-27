@@ -37,22 +37,26 @@ const addSeparator = (list: JValue[], node: JValue, separator: JSeparator) => {
     })
     return
 }
-export const walkValue = (parent: JValue | undefined, obj: unknown, depth: number, list: JValue[]): JValue => {
+export const walkValue = (parent: JValue | undefined, obj: unknown, depth: number, list: JValue[], maxDepth: {
+    maxDepth: number
+}): JValue => {
+    const id = list.length + 1
     const v: JValue = {
-        id: list.length + 1,
+        id,
         parent,
         depth,
         type: checkType(obj),
         raw: obj,
     }
     list.push(v);
-
-
+    if (depth > maxDepth.maxDepth) {
+        maxDepth.maxDepth = depth;
+    }
     switch (v.type) {
         case JType.Object: {
             v.children = []
             for (const key in obj as object) {
-                const vv = walkValue(v, (obj as Record<string, unknown>)[key], depth + 1, list);
+                const vv = walkValue(v, (obj as Record<string, unknown>)[key], depth + 1, list, maxDepth);
                 vv.name = key;
                 v.children.push(vv);
             }
@@ -63,7 +67,7 @@ export const walkValue = (parent: JValue | undefined, obj: unknown, depth: numbe
             v.repeated = true;
             v.elems = [];
             (obj as unknown[]).forEach((item: unknown) => {
-                const vv = walkValue(v, item, depth + 1, list);
+                const vv = walkValue(v, item, depth + 1, list, maxDepth);
                 v.elems!.push(vv);
             })
             addSeparator(list, v, JSeparator.ArrayEnd)
