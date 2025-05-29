@@ -13,6 +13,8 @@ export type AppContextProps = {
     setShowDepth: Dispatch<SetStateAction<number>>;
     expandKeys: Map<number, boolean>;
     setExpandKeys: Dispatch<SetStateAction<Map<number, boolean>>>;
+    error: string | null;
+    setError: Dispatch<SetStateAction<string | null>>;
 }
 
 export const AppContext = createContext<AppContextProps>({} as AppContextProps);

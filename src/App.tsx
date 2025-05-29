@@ -15,6 +15,7 @@ function App() {
     const [maxDepth, setMaxDepth] = useState(0);
     const [showDepth, setShowDepth] = useState(0);
     const [expandKeys, setExpandKeys] = useState<Map<number, boolean>>(new Map<number, boolean>());
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const keys = new Map<number, boolean>();
@@ -38,6 +39,8 @@ function App() {
             setExpandKeys,
             maxDepth,
             setMaxDepth,
+            error,
+            setError,
         }}>
             <div className={cn(
                 'w-screen h-screen flex flex-col',
@@ -99,5 +102,11 @@ const Header: FC = () => {
 
 
 const NoData: FC = () => {
-    return <div className='h-full flex items-center justify-center'>Drag File</div>
+    const {error} = useAppContext();
+    return <div className='h-full flex flex-col gap-2 items-center justify-center'>
+        <div className={'text-lg'}>Drag JSON file to this area to visualization</div>
+        {error !== null && <div className='text-red-500 opacity-80'>
+            Error: {error}
+        </div>}
+    </div>
 }
