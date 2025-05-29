@@ -4,6 +4,7 @@ import {Upload} from 'antd';
 import {cn} from "../lib/utils.ts";
 import {JValue, walkValue} from "./types.ts";
 import {useAppContext} from "../context.tsx";
+import {Events, Flags, triggerEvent} from "../events.ts";
 
 const {Dragger} = Upload;
 
@@ -71,15 +72,29 @@ export const DragUploader: FC<{
                 if (!file) {
                     return
                 }
+
+
                 void (async () => {
-                    const text = await file.text();
-                    const obj = JSON.parse(text)
-                    const list: JValue[] = [];
-                    const maxDepth = {maxDepth: 0}
-                    walkValue(undefined, obj, 0, list, maxDepth);
-                    setJValues(list);
-                    setRawSize(new Blob([text]).size);
-                    setMaxDepth(maxDepth.maxDepth);
+                    try {
+                        const text = await file.text();
+                        const obj = JSON.parse(text)
+                        const list: JValue[] = [];
+                        const maxDepth = {maxDepth: 0}
+                        const size = new Blob([text]).size;
+                        walkValue(undefined, obj, 0, list, maxDepth);
+                        setJValues(list);
+                        setRawSize(size);
+                        setMaxDepth(maxDepth.maxDepth);
+                        triggerEvent(Events.drag_file_success, {
+                            size,
+                            length: list.length,
+                            maxDepth: maxDepth.maxDepth,
+                        }, {flags: [Flags.drag_file]})
+                    } catch (e) {
+                        triggerEvent(Events.drag_file_failed, {
+                            error: `${e}`,
+                        }, {flags: [Flags.drag_file]})
+                    }
                 })()
             }}>
                 {children}
