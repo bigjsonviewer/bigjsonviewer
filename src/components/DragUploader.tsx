@@ -72,9 +72,8 @@ export const DragUploader: FC<{
                 if (!file) {
                     return
                 }
-
-
                 void (async () => {
+                    setJValues([]);
                     try {
                         const text = await file.text();
                         const obj = JSON.parse(text)
@@ -91,6 +90,7 @@ export const DragUploader: FC<{
                             maxDepth: maxDepth.maxDepth,
                         }, {flags: [Flags.drag_file]})
                     } catch (e) {
+                        console.log(`error: ${e}`);
                         triggerEvent(Events.drag_file_failed, {
                             error: `${e}`,
                         }, {flags: [Flags.drag_file]})
