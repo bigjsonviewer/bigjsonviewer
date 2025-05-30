@@ -18,3 +18,8 @@ body {
     border-inline-end: 1px dashed #b7b7b7;
     content: "";
 }
+
+.hit{
+    background: #ff9632;
+    color: black;
+}

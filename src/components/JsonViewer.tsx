@@ -102,8 +102,8 @@ const RenderValue: FC<{
                 '[&:hover_.copy]:visible',
             )}>
             <div className='flex flex-1 gap-3 '>
-                {node.name && <span>{node.name}: </span>}
-                {node.value as string && <span>{node.value as string}</span>}
+                <RenderJName node={node}/>
+                <RenderJValue node={node}/>
                 {node.type === JType.Object && <ObjectStartSigns toggle={toggle} node={node} expanded={expanded}/>}
                 {node.type === JType.Array && <ArrayStartSigns toggle={toggle} node={node} expanded={expanded}/>}
             </div>
@@ -120,6 +120,34 @@ const RenderValue: FC<{
             </div>
         </div>
     </div>
+}
+
+const RenderJName: FC<{ node: JValue }> = ({node}) => {
+    if (node.searchName) {
+        return <div dangerouslySetInnerHTML={{
+            __html: node.searchName
+        }}/>
+    }
+    if (node.name) {
+        return <div>
+            {node.name}:
+        </div>
+    }
+    return <></>
+}
+
+const RenderJValue: FC<{ node: JValue }> = ({node}) => {
+    if (node.searchValue) {
+        return <div dangerouslySetInnerHTML={{
+            __html: node.searchValue
+        }}/>
+    }
+    if (node.value) {
+        return <div>
+            {node.value}
+        </div>
+    }
+    return <></>
 }
 
 const ObjectStartSigns: FC<{

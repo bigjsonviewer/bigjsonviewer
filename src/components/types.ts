@@ -16,9 +16,11 @@ export enum JSeparator {
 export type JValue = {
     id: number;
     name?: string;
+    searchName?: string;
+    value?: string;
+    searchValue?: string;
     type: JType;
     repeated?: boolean;
-    value?: unknown;
     children?: JValue[];
     elems?: JValue[];
     raw: unknown;
@@ -77,7 +79,7 @@ export const walkValue = (parent: JValue | undefined, obj: unknown, depth: numbe
         case JType.Number:
         case JType.Boolean:
         case JType.Null: {
-            v.value = obj;
+            v.value = `${obj}`;
             break
         }
     }

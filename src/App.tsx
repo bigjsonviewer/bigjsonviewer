@@ -7,6 +7,7 @@ import {DragUploader} from "./components/DragUploader.tsx";
 import {JValue} from "./components/types.ts";
 import prettyBytes from "pretty-bytes";
 import {Select, SelectProps} from "antd";
+import {Search} from "./components/Search.tsx";
 
 function App() {
 
@@ -76,7 +77,10 @@ const Header: FC = () => {
     }, [maxDepth])
 
     return <div className='flex justify-between items-center p-2 border-b border-gray-200'>
-        <strong>Big JSON Viewer</strong>
+        <div className='flex gap-4 items-center'>
+            <strong>Big JSON Viewer</strong>
+            <Search/>
+        </div>
         {rawSize > 0 && <div className='flex gap-4 items-center'>
             <div className='flex gap-2'>
                 <span>size:</span>
