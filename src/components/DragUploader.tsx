@@ -36,7 +36,7 @@ export const DragUploader: FC<{
     children?: ReactNode
 }> = ({children}) => {
     const [dragging, setDragging] = useState(false);
-    const {setJValues, setRawSize, setMaxDepth, setError} = useAppContext()
+    const {setJValues, setRawSize, setMaxDepth, setFileError} = useAppContext()
     return (
         <div className={cn(
             'h-full',
@@ -72,9 +72,11 @@ export const DragUploader: FC<{
                 if (!file) {
                     return
                 }
+                setJValues([]);
+                setRawSize(0);
+                setMaxDepth(0);
+                setFileError(null);
                 void (async () => {
-                    setJValues([]);
-                    setError(null);
                     try {
                         const text = await file.text();
                         const obj = JSON.parse(text)
@@ -91,7 +93,7 @@ export const DragUploader: FC<{
                             maxDepth: maxDepth.maxDepth,
                         }, {flags: [Flags.drag_file]})
                     } catch (e) {
-                        setError(`${e}`);
+                        setFileError(`${e}`);
                         triggerEvent(Events.drag_file_failed, {
                             error: `${e}`,
                         }, {flags: [Flags.drag_file]})

@@ -39,8 +39,8 @@ function App() {
             setExpandKeys,
             maxDepth,
             setMaxDepth,
-            error,
-            setError,
+            fileError: error,
+            setFileError: setError,
         }}>
             <div className={cn(
                 'w-screen h-screen flex flex-col',
@@ -102,11 +102,11 @@ const Header: FC = () => {
 
 
 const NoData: FC = () => {
-    const {error} = useAppContext();
+    const {fileError} = useAppContext();
     return <div className='h-full flex flex-col gap-2 items-center justify-center'>
-        <div className={'text-lg'}>Drag JSON file to this area to visualization</div>
-        {error !== null && <div className='text-red-500 opacity-80'>
-            Error: {error}
+        <div className={'text-lg'}>Drag JSON file here</div>
+        {fileError !== null && <div className='text-red-500 opacity-80'>
+            Invalid JSON file
         </div>}
     </div>
 }
