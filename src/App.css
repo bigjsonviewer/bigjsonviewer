@@ -19,7 +19,19 @@ body {
     content: "";
 }
 
-.hit{
+.hit {
     background: #ff9632;
     color: black;
+}
+
+.string {
+    color: #0b7500;
+}
+
+.null, .boolean {
+    color: #ff6b00;
+}
+
+.number {
+    color: #1a01cc;
 }
