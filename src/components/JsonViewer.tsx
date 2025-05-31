@@ -1,8 +1,8 @@
-import {FC, MutableRefObject, useCallback, useMemo, useRef} from "react";
+import {FC, useCallback, useMemo} from "react";
 import {Virtuoso} from "react-virtuoso";
 import {cn} from "../lib/utils.ts";
 import {useAppContext} from "../context.tsx";
-import {BlockTypes, JSeparator, JType, JValue} from "./types.ts";
+import {JSeparator, JType, JValue} from "./types.ts";
 import {DownOutlined, RightOutlined} from "@ant-design/icons";
 import {Typography} from "antd";
 
@@ -89,32 +89,35 @@ const prepareHoverBlockStyle = (id: number | undefined) => {
     `
 }
 
-const handleHoverEvent = (style: MutableRefObject<HTMLStyleElement | undefined>, node: JValue) => {
-    style.current = document.createElement('style');
-    style.current.setAttribute('s', 'bjv');
+const handleHoverEvent = (node: JValue) => {
+    const style = document.createElement('style');
+    style.setAttribute('s', 'bjv');
     const styles: string[] = []
     let parent = node.parent;
     while (parent) {
         styles.push(prepareHoverParentStyle(parent.id))
         parent = parent.parent
     }
-    if (BlockTypes.includes(node.type)) {
-        styles.push(prepareHoverBlockStyle(node.id))
-    }
+    // if (BlockTypes.includes(node.type)) {
+    //     styles.push(prepareHoverBlockStyle(node.id))
+    // }
     if (node.separator) {
         styles.push(prepareHoverBlockStyle(node.parent?.id))
     }
-    style.current.innerHTML = styles.join('\n');
-    document.head.appendChild(style.current);
+    style.innerHTML = styles.join('\n');
+    document.head.appendChild(style);
 }
 
-const handleIdentHoverEvent = (style: MutableRefObject<HTMLStyleElement | undefined>, id: number) => {
-    style.current = document.createElement('style');
-    style.current.setAttribute('s', 'bjv');
+const handleIdentHoverEvent = (id: number | undefined) => {
+    if (id === undefined) {
+        return ''
+    }
+    const style = document.createElement('style');
+    style.setAttribute('s', 'bjv');
     const styles: string[] = []
     styles.push(prepareHoverBlockStyle(id))
-    style.current.innerHTML = styles.join('\n');
-    document.head.appendChild(style.current);
+    style.innerHTML = styles.join('\n');
+    document.head.appendChild(style);
 }
 
 const removeCustomStyles = () => {
@@ -130,18 +133,6 @@ const RenderItem: FC<{
     node: JValue,
 }> = ({node}) => {
 
-    const style = useRef<HTMLStyleElement>();
-
-    // const indents = Array(node.separator ? node.depth - 1 : node.depth)
-    //     .fill(0)
-    //     .map((_, index) => (
-    //         <div
-    //             className="tree-indent-unit"
-    //             style={{width: 24}}
-    //             key={`${index}`}
-    //         />
-    //     ));
-
 
     const indents = node.path.map((id) => (
         <div
@@ -151,8 +142,9 @@ const RenderItem: FC<{
             )}
             style={{width: 24}}
             key={`${id}`}
-            onMouseOver={() => handleIdentHoverEvent(style, id)}
+            onMouseOver={() => handleIdentHoverEvent(id)}
             onMouseOut={() => removeCustomStyles()}
+            onMouseLeave={() => removeCustomStyles()}
         />
     ));
 
@@ -161,8 +153,12 @@ const RenderItem: FC<{
             'h-[24px] w-full px-2 whitespace-nowrap overflow-hidden flex items-center',
             `n-${node.id}`,
         )}
-        onMouseOver={() => handleHoverEvent(style, node)}
+        onMouseOver={() => {
+            handleHoverEvent(node)
+            handleIdentHoverEvent(node.parent?.id)
+        }}
         onMouseOut={() => removeCustomStyles()}
+        onMouseLeave={() => removeCustomStyles()}
     >
         {indents}
         <div className='h-full flex-1'>
