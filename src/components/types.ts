@@ -28,7 +28,6 @@ export type JValue = {
     parent?: JValue;
     separator?: JSeparator;
     hit?: boolean,
-    path: number[],
 }
 
 export const BlockTypes = [JType.Object, JType.Array]
@@ -53,7 +52,6 @@ export const walkValue = (parent: JValue | undefined, obj: unknown, depth: numbe
         depth,
         type: checkType(obj),
         raw: obj,
-        path: parent ? [...parent.path, parent.id] : [],
     }
     list.push(v);
     if (depth > maxDepth.maxDepth) {

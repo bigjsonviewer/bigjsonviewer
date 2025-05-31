@@ -50,7 +50,7 @@ export const JsonViewer: FC = () => {
 
 
     useEffect(() => {
-        console.log('renderItems update')
+        console.log('renderItems update:', renderItems.length)
     }, [renderItems])
 
     // 清理无需缓存的 key
@@ -61,7 +61,7 @@ export const JsonViewer: FC = () => {
                     prev.delete(id);
                 }
             }
-            console.log(prev)
+            // console.log(prev)
             return new Map(prev)
         })
     }, [showDepth, jValues, setFoldKeys])
@@ -69,8 +69,8 @@ export const JsonViewer: FC = () => {
 
     return <Virtuoso<JValue>
         className={'h-full min-h-[300px] min-w-[500px]'}
-        data={renderItems}
         ref={treeRef}
+        totalCount={renderItems.length}
         itemContent={(i) => {
             return renderItem(renderItems, i)
         }}
@@ -153,20 +153,31 @@ const RenderItem: FC<{
     comma: boolean,
 }> = ({node, comma}) => {
 
+    const indents = (() => {
+        const paths: number[] = [];
+        let parent = node.parent;
+        while (parent) {
+            paths.push(parent.id)
+            parent = parent.parent
+        }
+        if (node.separator) {
+            paths.pop()
+        }
 
-    const indents = node.path.map((id) => (
-        <div
-            className={cn(
-                'tree-indent-unit',
-                `n-${id}`,
-            )}
-            style={{width: 24}}
-            key={`${id}`}
-            onMouseOver={() => handleIdentHoverEvent(id)}
-            onMouseOut={() => removeCustomStyles()}
-            onMouseLeave={() => removeCustomStyles()}
-        />
-    ));
+        return paths.reverse().map((id) => (
+            <div
+                className={cn(
+                    'tree-indent-unit',
+                    `n-${id}`,
+                )}
+                style={{width: 24}}
+                key={`${id}`}
+                onMouseOver={() => handleIdentHoverEvent(id)}
+                onMouseOut={() => removeCustomStyles()}
+                onMouseLeave={() => removeCustomStyles()}
+            />
+        ));
+    })()
 
     return <div
         className={cn(
@@ -327,8 +338,14 @@ const RenderJString: FC<{ node: JValue }> = ({node}) => {
         }}/>{'"'}
         </div>
     }
+
+    let value = node.value || '';
+    if (value.length > 100) {
+        value = value.slice(0, 100) + '...'
+    }
+
     return <div className='string'>
-        {`"${node.value}"`}
+        {`"${value}"`}
     </div>
 }
 
