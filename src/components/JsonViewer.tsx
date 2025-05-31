@@ -32,7 +32,7 @@ const hasComma = (items: JValue[], i: number) => {
 
 export const JsonViewer: FC = () => {
 
-    const {jValues, showDepth, expandKeys} = useAppContext();
+    const {jValues, showDepth, expandKeys, treeRef} = useAppContext();
 
     const renderItems = useMemo(() => {
         const items = jValues.filter(v => calcExpand(expandKeys, v));
@@ -52,7 +52,7 @@ export const JsonViewer: FC = () => {
     return <Virtuoso<JValue>
         className={'h-full min-h-[300px] min-w-[500px]'}
         data={renderItems}
-
+        ref={treeRef}
         itemContent={(_, node) => {
             return renderItem(node)
         }}

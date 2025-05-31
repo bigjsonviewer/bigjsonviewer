@@ -1,7 +1,8 @@
-import {LoadingOutlined, SearchOutlined} from "@ant-design/icons";
-import {Input, Spin} from "antd";
-import {useCallback, useState} from "react";
+import {ArrowDownOutlined, ArrowUpOutlined, LoadingOutlined} from "@ant-design/icons";
+import {Button, Input, InputRef, Spin} from "antd";
+import {useCallback, useEffect, useRef, useState} from "react";
 import {useAppContext} from "../context.tsx";
+import {useDebounce} from "ahooks";
 
 const renderHitText = (str: string) => {
     return `<span class="hit">${str}</span>`
@@ -9,14 +10,25 @@ const renderHitText = (str: string) => {
 
 export const Search = () => {
 
-    const {setJValues} = useAppContext();
+    const {setJValues, treeRef} = useAppContext();
     const [value, setValue] = useState('');
     const [searching, setSearching] = useState<boolean>(false);
-    const [hitIndexes, setHitIndexes] = useState<number[]>([]);
+    const [hitNodes, setHitNodes] = useState<number[]>([]);
+    const [selectIndex, setSelectIndex] = useState<number>(0);
+    const ref = useRef<InputRef>(null);
 
-    const search = useCallback(() => {
-        const searchStr = value;
+    useEffect(() => {
+        // console.log('hitIndex:', selectIndex, hitNodes[selectIndex]);
+        const id = hitNodes[selectIndex];
+        if (id !== undefined) {
+            treeRef.current?.scrollToIndex(id);
+        }
+    }, [selectIndex, hitNodes]);
+
+    const search = useCallback((searchStr: string) => {
         setSearching(true);
+        setSelectIndex(0);
+        setHitNodes([]);
         setTimeout(() => {
             const indexes: number[] = [];
             setJValues(prev => {
@@ -35,33 +47,48 @@ export const Search = () => {
                         item.searchValue = undefined;
                     }
                     if (searchStr && hit) {
+                        item.hit = true;
                         indexes.push(index);
                     }
-                    return {...item};
+                    return item.hit ? {...item} : item;
                 })
             })
-            setHitIndexes(indexes);
-            setSearching(false)
+            setHitNodes(indexes);
+            setSearching(false);
+            setTimeout(() => {
+                ref.current?.focus();
+            }, 0);
         }, 0)
-    }, [value, setJValues])
+    }, [value, setJValues]);
+
+    const debounce = useDebounce(value, {wait: 500});
+    useEffect(() => {
+        search(debounce);
+    }, [debounce]);
 
 
     return <div className='w-[450px] flex items-center gap-2'>
         <Input
-            suffix={
-                searching ? <Spin spinning={true} indicator={<LoadingOutlined/>}/> :
-                    <SearchOutlined onClick={() => search()}/>
-            }
+            ref={ref}
+            prefix={<Spin spinning={searching} indicator={<LoadingOutlined/>}/>}
+            suffix={<div className={'flex items-center gap-2'}>
+                {hitNodes.length > 0 && <div>
+                    {selectIndex + 1}/{hitNodes.length}
+                </div>
+                }
+                <Button disabled={selectIndex <= 0} onClick={() => {
+                    setSelectIndex(prev => prev - 1)
+                }} icon={<ArrowUpOutlined/>}/>
+                <Button disabled={selectIndex >= hitNodes.length - 1} onClick={() => {
+                    setSelectIndex(prev => prev + 1)
+                }} icon={<ArrowDownOutlined/>}/>
+            </div>}
             placeholder=""
             disabled={searching}
             value={value}
             onChange={e => {
                 setValue(e.target.value);
             }}
-            onPressEnter={() => search()}
         />
-        <span>
-            {hitIndexes.length}
-        </span>
     </div>
 }
