@@ -1,10 +1,10 @@
-import {FC, useCallback, useMemo} from "react";
+import {FC, MutableRefObject, useCallback, useMemo, useRef} from "react";
 import {Virtuoso} from "react-virtuoso";
 import {cn} from "../lib/utils.ts";
 import {useAppContext} from "../context.tsx";
-import {JSeparator, JType, JValue} from "./types.ts";
+import {BlockTypes, JSeparator, JType, JValue} from "./types.ts";
 import {DownOutlined, RightOutlined} from "@ant-design/icons";
-import {Tag, Typography} from "antd";
+import {Typography} from "antd";
 
 
 const calcExpand = (expandKeys: Map<number, boolean>, node: JValue): boolean => {
@@ -20,71 +20,171 @@ const calcExpand = (expandKeys: Map<number, boolean>, node: JValue): boolean => 
     return expand
 }
 
+
+const hasComma = (items: JValue[], i: number) => {
+    const node = items[i];
+    const notLast = (() => {
+        return items[i + 1] !== undefined && items[i + 1].separator === undefined;
+    })();
+    const blockTypes = [JType.Object, JType.Array];
+    return blockTypes.includes(node.parent?.type || JType.Unknown) && notLast
+}
+
 export const JsonViewer: FC = () => {
 
     const {jValues, showDepth, expandKeys} = useAppContext();
 
-
     const renderItems = useMemo(() => {
-        return jValues.filter(v => calcExpand(expandKeys, v));
-    }, [jValues, showDepth, expandKeys])
+        const items = jValues.filter(v => calcExpand(expandKeys, v));
+        return items.map((v, i) => ({
+            ...v,
+            comma: hasComma(items, i)
+        }))
+    }, [jValues, showDepth, expandKeys]);
+
+    // console.log('renderItems:', renderItems.map(v => ({
+    //     id: v.id,
+    //     name: v.name,
+    //     separator: v.separator,
+    //     comma: v.comma
+    // })))
 
     return <Virtuoso<JValue>
         className={'h-full min-h-[300px] min-w-[500px]'}
         data={renderItems}
 
         itemContent={(_, node) => {
-            return renderItem(jValues, node)
+            return renderItem(node)
         }}
     />
 }
 
 
-const renderItem = (jValues: JValue[], node: JValue) => {
+const renderItem = (node: JValue) => {
+    return <RenderItem node={node}/>
+}
 
-
-    const indents = Array(node.separator ? node.depth - 1 : node.depth)
-        .fill(0)
-        .map((_, index) => (
-            <div
-                className="tree-indent-unit"
-                style={{width: 24}}
-                key={`${index}`}
-            />
-        ));
-
-    const hasComma = (() => {
-
-        const notLast = (() => {
-            return jValues[node.id + 1] !== undefined && jValues[node.id + 1].separator === undefined;
-        })();
-
-        const blockTypes = [JType.Object, JType.Array];
-        if (blockTypes.includes(node.type)) {
-            return node.separator !== undefined && notLast
+const prepareHoverParentStyle = (id: number | undefined) => {
+    if (id === undefined) {
+        return ''
+    }
+    return `   
+        .n-${id} {
+            color: #ff0000;
         }
-        return blockTypes.includes(node.parent?.type || JType.Unknown) && notLast
-    })()
+    `
+}
 
-    return <div className={cn(
-        'h-[35px] w-full whitespace-nowrap overflow-hidden flex items-center',
-    )}
+const prepareHoverBlockStyle = (id: number | undefined) => {
+    if (id === undefined) {
+        return ''
+    }
+    return `   
+        .n-${id} {
+            color: #ff0000;
+        }
+        .n-${id}.tree-indent-unit::before {
+            border-inline-end: 1px dashed #ff0000;
+        }
+    `
+}
+
+const handleHoverEvent = (style: MutableRefObject<HTMLStyleElement | undefined>, node: JValue) => {
+    style.current = document.createElement('style');
+    style.current.setAttribute('s', 'bjv');
+    const styles: string[] = []
+    let parent = node.parent;
+    while (parent) {
+        styles.push(prepareHoverParentStyle(parent.id))
+        parent = parent.parent
+    }
+    if (BlockTypes.includes(node.type)) {
+        styles.push(prepareHoverBlockStyle(node.id))
+    }
+    if (node.separator) {
+        styles.push(prepareHoverBlockStyle(node.parent?.id))
+    }
+    style.current.innerHTML = styles.join('\n');
+    document.head.appendChild(style.current);
+}
+
+const handleIdentHoverEvent = (style: MutableRefObject<HTMLStyleElement | undefined>, id: number) => {
+    style.current = document.createElement('style');
+    style.current.setAttribute('s', 'bjv');
+    const styles: string[] = []
+    styles.push(prepareHoverBlockStyle(id))
+    style.current.innerHTML = styles.join('\n');
+    document.head.appendChild(style.current);
+}
+
+const removeCustomStyles = () => {
+    for (const child of document.head.children) {
+        if (child.getAttribute('s') === 'bjv') {
+            document.head.removeChild(child);
+        }
+    }
+}
+
+
+const RenderItem: FC<{
+    node: JValue,
+}> = ({node}) => {
+
+    const style = useRef<HTMLStyleElement>();
+
+    // const indents = Array(node.separator ? node.depth - 1 : node.depth)
+    //     .fill(0)
+    //     .map((_, index) => (
+    //         <div
+    //             className="tree-indent-unit"
+    //             style={{width: 24}}
+    //             key={`${index}`}
+    //         />
+    //     ));
+
+
+    const indents = node.path.map((id) => (
+        <div
+            className={cn(
+                'tree-indent-unit',
+                `n-${id}`,
+            )}
+            style={{width: 24}}
+            key={`${id}`}
+            onMouseOver={() => handleIdentHoverEvent(style, id)}
+            onMouseOut={() => removeCustomStyles()}
+        />
+    ));
+
+    return <div
+        className={cn(
+            'h-[24px] w-full px-2 whitespace-nowrap overflow-hidden flex items-center',
+            `n-${node.id}`,
+        )}
+        onMouseOver={() => handleHoverEvent(style, node)}
+        onMouseOut={() => removeCustomStyles()}
     >
         {indents}
         <div className='h-full flex-1'>
-            {node.separator !== undefined ? <RenderSeparator node={node} hasComma={hasComma}/> :
-                <RenderValue node={node} hasComma={hasComma}/>}
+            {node.separator !== undefined ? <RenderSeparator node={node} hasComma={node.comma}/> :
+                <RenderValue node={node} hasComma={node.comma}/>}
         </div>
     </div>
 }
 
-const RenderSeparator: FC<{ node: JValue, hasComma: boolean }> = ({node, hasComma}) => {
+const RenderSeparator: FC<{ node: JValue, hasComma?: boolean }> = ({node, hasComma}) => {
     switch (node.separator) {
         case JSeparator.ObjectEnd: {
-            return <span className='ml-3'>{'}'}{hasComma && <span>,</span>}</span>
+            return <span className={cn(
+                'ml-3',
+                `n-${node.parent?.id}`,
+            )}>{'}'}{hasComma && <span>,</span>}</span>
         }
         case JSeparator.ArrayEnd: {
-            return <span className='ml-3'>{']'}{hasComma && <span>,</span>}</span>
+            return <span className={cn(
+                'ml-3',
+                `n-${node.parent?.id}`,
+            )}>{']'}{hasComma && <span>,</span>}</span>
         }
     }
     return ''
@@ -93,7 +193,7 @@ const RenderSeparator: FC<{ node: JValue, hasComma: boolean }> = ({node, hasComm
 
 const RenderValue: FC<{
     node: JValue
-    hasComma: boolean,
+    hasComma?: boolean,
 }> = ({node, hasComma}) => {
     const {expandKeys, setExpandKeys, showDepth} = useAppContext();
 
@@ -117,7 +217,7 @@ const RenderValue: FC<{
         }}>{expanded ? <DownOutlined/> : <RightOutlined/>}</div>}
         <div
             className={cn(
-                'h-full flex flex-1 ml-2 px-2 items-center justify-between border rounded border-transparent hover:border-blue-400',
+                'flex flex-1 ml-2 items-center justify-between rounded hover:bg-amber-100',
                 '[&:hover_.copy]:visible',
             )}>
             <div className='flex flex-1 '>
@@ -125,17 +225,19 @@ const RenderValue: FC<{
                 <RenderJValue node={node}/>
                 {node.type !== JType.Object && node.type !== JType.Array && hasComma && <span>,</span>}
                 {node.type === JType.Object &&
-                    <ObjectStartSigns toggle={toggle} node={node} expanded={expanded} hasComma={hasComma}/>}
+                    <ObjectStartSigns node={node} expanded={expanded} hasComma={hasComma}/>}
                 {node.type === JType.Array &&
-                    <ArrayStartSigns toggle={toggle} node={node} expanded={expanded} hasComma={hasComma}/>}
+                    <ArrayStartSigns node={node} expanded={expanded} hasComma={hasComma}/>}
             </div>
             <div className={cn(
-                'flex items-center gap-2',
+                'flex items-center gap-2 text-gray-400',
             )}>
                 {node.children && <span>{node.children.length} items</span>}
                 {node.elems && <span>{node.elems.length} items</span>}
                 <span className='copy invisible'>
-                    <Typography.Text copyable={{
+                    <Typography.Text className={cn(
+                        '[&_.anticon-copy]:!text-gray-400'
+                    )} copyable={{
                         text: () => JSON.stringify(node.raw, null, 2)
                     }}/>
                 </span>
@@ -237,37 +339,27 @@ const RenderJNull: FC<{ node: JValue }> = ({node}) => {
 const ObjectStartSigns: FC<{
     node: JValue,
     expanded: boolean,
-    toggle: (node: JValue) => void,
-    hasComma: boolean,
-}> = ({node, expanded, toggle, hasComma}) => {
+    hasComma?: boolean,
+}> = ({node, expanded, hasComma}) => {
     if (expanded) {
         return <span>{'{'}</span>
     }
     if (node.children!.length === 0) {
-        return <Tag className='cursor-pointer' onClick={() => {
-            toggle(node)
-        }}>{'{}'}{hasComma && <span>,</span>}</Tag>
+        return <div>{'{}'}{hasComma && <span>,</span>}</div>
     }
-    return <Tag className='cursor-pointer' onClick={() => {
-        toggle(node)
-    }}>{'{...}'}{hasComma ? <span>,</span> : '?'}</Tag>
+    return <div>{'{ ... }'}{hasComma && <span>,</span>}</div>
 }
 
 const ArrayStartSigns: FC<{
     node: JValue,
     expanded: boolean,
-    toggle: (node: JValue) => void,
-    hasComma: boolean,
-}> = ({node, expanded, toggle, hasComma}) => {
+    hasComma?: boolean,
+}> = ({node, expanded, hasComma}) => {
     if (expanded) {
         return <span>{'['}</span>
     }
     if (node.elems!.length === 0) {
-        return <Tag className='cursor-pointer' onClick={() => {
-            toggle(node)
-        }}>{'[]'}{hasComma && <span>,</span>}</Tag>
+        return <div>{'[]'}{hasComma && <span>,</span>}</div>
     }
-    return <Tag className='cursor-pointer' onClick={() => {
-        toggle(node)
-    }}>{'[...]'}{hasComma && <span>,</span>}</Tag>
+    return <div>{'[ ... ]'}{hasComma && <span>,</span>}</div>
 }
