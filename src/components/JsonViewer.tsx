@@ -1,9 +1,9 @@
-import {FC, useEffect, useMemo} from "react";
+import {Dispatch, FC, SetStateAction, useEffect, useMemo} from "react";
 import {Virtuoso} from "react-virtuoso";
 import {useAppContext} from "../context.tsx";
 import {JSeparator, JType, JValue} from "./types.ts";
 import {DownOutlined, RightOutlined} from "@ant-design/icons";
-import {Tag, Typography} from "antd";
+import {Typography} from "antd";
 import {cn} from "../utils/tailwindcss.ts";
 
 
@@ -27,10 +27,7 @@ const calcFolded = (foldKeys: Map<number, boolean>, node: JValue, showDepth: num
     if (foldKeys.has(node.id)) {
         return foldKeys.get(node.id)!;
     }
-    if (showDepth !== -1 && node.depth > showDepth) {
-        return true
-    }
-    return false
+    return showDepth !== -1 && node.depth > showDepth;
 }
 
 
@@ -52,14 +49,19 @@ export const JsonViewer: FC = () => {
     }, [jValues, showDepth, foldKeys]);
 
 
+    useEffect(() => {
+        console.log('renderItems update')
+    }, [renderItems])
+
     // 清理无需缓存的 key
     useEffect(() => {
         setFoldKeys((prev) => {
             for (const id of prev.keys()) {
-                if (showDepth === -1 || jValues[id].depth <= showDepth) {
+                if (showDepth === -1 || jValues[id].depth > showDepth) {
                     prev.delete(id);
                 }
             }
+            console.log(prev)
             return new Map(prev)
         })
     }, [showDepth, jValues, setFoldKeys])
@@ -205,43 +207,41 @@ const RenderSeparator: FC<{ node: JValue, hasComma?: boolean }> = ({node, hasCom
 }
 
 
+const toggle = (setFoldKeys: Dispatch<SetStateAction<Map<number, boolean>>>, node: JValue, showDepth: number) => {
+    setFoldKeys(prev => {
+        if (showDepth === -1 || node.depth <= showDepth) {
+            if (prev.get(node.id)) {
+                if (showDepth === -1 || node.depth <= showDepth) {
+                    prev.delete(node.id)
+                } else {
+                    prev.set(node.id, false)
+                }
+            } else {
+                prev.set(node.id, true)
+            }
+        } else {
+            // 默认未显示的情况下，点击是展开
+            if (prev.has(node.id) && prev.get(node.id) === false) {
+                prev.set(node.id, true)
+            } else {
+                prev.set(node.id, false)
+            }
+        }
+        // console.log('prev:', prev);
+        return new Map<number, boolean>(prev);
+    })
+}
+
 const RenderValue: FC<{
     node: JValue
     hasComma?: boolean,
 }> = ({node, hasComma}) => {
     const {foldKeys, setFoldKeys, showDepth} = useAppContext();
-
-    const folded = calcFolded(foldKeys, node, showDepth)
-
-    const toggle = (node: JValue) => {
-        setFoldKeys(prev => {
-            if (showDepth === -1 || node.depth <= showDepth) {
-                if (prev.get(node.id)) {
-                    if (showDepth === -1 || node.depth <= showDepth) {
-                        prev.delete(node.id)
-                    } else {
-                        prev.set(node.id, false)
-                    }
-                } else {
-                    prev.set(node.id, true)
-                }
-            } else {
-                // 默认未显示的情况下，点击是展开
-                if (prev.has(node.id) && prev.get(node.id) === false) {
-                    prev.set(node.id, true)
-                } else {
-                    prev.set(node.id, false)
-                }
-            }
-            console.log('prev:', prev);
-            return new Map<number, boolean>(prev);
-        })
-    }
-
+    const folded = calcFolded(foldKeys, node, showDepth);
 
     return <div className='h-full flex flex-1 items-center'>
         {[JType.Object, JType.Array].includes(node.type) && <div className='cursor-pointer' onClick={() => {
-            toggle(node);
+            toggle(setFoldKeys, node, showDepth);
         }}>{!folded ? <DownOutlined/> : <RightOutlined/>}</div>}
         <div
             className={cn(

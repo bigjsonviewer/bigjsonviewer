@@ -96,7 +96,9 @@ export const Search: FC<{
                 <Button disabled={selectIndex >= hitNodes.length - 1} onClick={() => {
                     setSelectIndex(prev => prev + 1)
                 }} icon={<ArrowDownOutlined/>}/>
-                <Button disabled={!value} icon={<CloseOutlined/>}/>
+                <Button disabled={!value} icon={<CloseOutlined/>} onClick={() => {
+                    setValue('');
+                }}/>
 
             </div>}
             placeholder=""
