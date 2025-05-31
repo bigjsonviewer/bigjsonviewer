@@ -1,10 +1,10 @@
 import {FC, useCallback, useMemo} from "react";
 import {Virtuoso} from "react-virtuoso";
-import {cn} from "../lib/utils.ts";
 import {useAppContext} from "../context.tsx";
 import {JSeparator, JType, JValue} from "./types.ts";
 import {DownOutlined, RightOutlined} from "@ant-design/icons";
 import {Typography} from "antd";
+import {cn} from "../utils/tailwindcss.ts";
 
 
 export const calcExpand = (expandKeys: Map<number, boolean>, node: JValue): boolean => {

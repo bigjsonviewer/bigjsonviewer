@@ -1,7 +1,6 @@
 import {FC, ReactNode, useEffect, useState} from 'react';
 import type {UploadProps} from 'antd';
 import {Upload} from 'antd';
-import {cn} from "../lib/utils.ts";
 import {JValue, walkValue} from "./types.ts";
 import {useAppContext} from "../context.tsx";
 import {Events, Flags, triggerEvent} from "../events.ts";
@@ -9,6 +8,8 @@ import {getCurrentWebview} from "@tauri-apps/api/webview";
 import type {UnlistenFn} from "@tauri-apps/api/event";
 import {BaseDirectory, readFile} from "@tauri-apps/plugin-fs";
 import {isApp} from "../utils/isApp.ts";
+import {cn} from "../utils/tailwindcss.ts";
+import {testData} from "./data.ts";
 
 
 const {Dragger} = Upload;
@@ -73,6 +74,7 @@ export const DragUploader: FC<{
     };
 
     useEffect(() => {
+        setData(testData);
         if (!isApp()) {
             return
         }

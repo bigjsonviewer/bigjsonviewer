@@ -2,7 +2,6 @@ import "./App.css";
 import {JsonViewer} from "./components/JsonViewer.tsx";
 import {AppContext, useAppContext} from "./context.tsx";
 import {FC, useEffect, useMemo, useRef, useState} from "react";
-import {cn} from "./lib/utils.ts";
 import {DragUploader} from "./components/DragUploader.tsx";
 import {JValue} from "./components/types.ts";
 import prettyBytes from "pretty-bytes";
@@ -10,6 +9,7 @@ import {InputRef, Select, SelectProps} from "antd";
 import {Search} from "./components/Search.tsx";
 import {VirtuosoHandle} from "react-virtuoso";
 import {useMount} from "ahooks";
+import {cn} from "./utils/tailwindcss.ts";
 
 function App() {
 

@@ -1,4 +1,4 @@
-import {ArrowDownOutlined, ArrowUpOutlined, LoadingOutlined} from "@ant-design/icons";
+import {ArrowDownOutlined, ArrowUpOutlined, CloseOutlined, LoadingOutlined} from "@ant-design/icons";
 import {Button, Input, InputRef, Spin} from "antd";
 import {FC, RefObject, useCallback, useEffect, useState} from "react";
 import {useAppContext} from "../context.tsx";
@@ -96,6 +96,8 @@ export const Search: FC<{
                 <Button disabled={selectIndex >= hitNodes.length - 1} onClick={() => {
                     setSelectIndex(prev => prev + 1)
                 }} icon={<ArrowDownOutlined/>}/>
+                <Button disabled={!value} icon={<CloseOutlined/>}/>
+
             </div>}
             placeholder=""
             disabled={searching}
