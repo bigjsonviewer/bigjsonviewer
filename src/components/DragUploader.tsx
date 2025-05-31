@@ -1,10 +1,16 @@
-import {FC, ReactNode, useState} from 'react';
+import {FC, ReactNode, useEffect, useState} from 'react';
 import type {UploadProps} from 'antd';
 import {Upload} from 'antd';
 import {cn} from "../lib/utils.ts";
 import {JValue, walkValue} from "./types.ts";
 import {useAppContext} from "../context.tsx";
 import {Events, Flags, triggerEvent} from "../events.ts";
+import {getCurrentWebview} from "@tauri-apps/api/webview";
+import type {UnlistenFn} from "@tauri-apps/api/event";
+import {BaseDirectory, readFile} from "@tauri-apps/plugin-fs";
+import {platform} from "@tauri-apps/plugin-os";
+import {isApp} from "../utils/isApp.ts";
+
 
 const {Dragger} = Upload;
 
@@ -28,15 +34,77 @@ const props: UploadProps = {
     //     }
     // },
     openFileDialogOnClick: false,
-
 };
 
 
 export const DragUploader: FC<{
     children?: ReactNode
 }> = ({children}) => {
+
+
     const [dragging, setDragging] = useState(false);
     const {setJValues, setRawSize, setMaxDepth, setFileError} = useAppContext()
+
+    const setData = (text: string) => {
+        setDragging(false);
+        setJValues([]);
+        setRawSize(0);
+        setMaxDepth(0);
+        setFileError(null);
+        try {
+            const obj = JSON.parse(text)
+            const list: JValue[] = [];
+            const maxDepth = {maxDepth: 0}
+            const size = new Blob([text]).size;
+            walkValue(undefined, obj, 0, list, maxDepth);
+            setJValues(list);
+            setRawSize(size);
+            setMaxDepth(maxDepth.maxDepth);
+            triggerEvent(Events.drag_file_success, {
+                size,
+                length: list.length,
+                maxDepth: maxDepth.maxDepth,
+            }, {flags: [Flags.drag_file]})
+        } catch (e) {
+            setFileError(`${e}`);
+            triggerEvent(Events.drag_file_failed, {
+                error: `${e}`,
+            }, {flags: [Flags.drag_file]})
+        }
+    };
+
+    useEffect(() => {
+        if (!isApp()) {
+            return
+        }
+        let unListen: UnlistenFn;
+        void (async () => {
+            unListen = await getCurrentWebview().onDragDropEvent((event) => {
+                if (event.payload.type === 'over') {
+                    // console.log('User hovering', event.payload.position);
+                } else if (event.payload.type === 'drop') {
+                    const paths = event.payload.paths;
+                    console.log('User dropped', event.payload.paths);
+                    void (async () => {
+                        const contents = await readFile(paths[0], {
+                            baseDir: BaseDirectory.Home,
+                        });
+                        const decoder = new TextDecoder('utf-8');
+                        const text = decoder.decode(contents);
+                        console.log('contents:', text.length)
+                        setData(text);
+                    })()
+                } else {
+                    console.log('File drop cancelled');
+                }
+            });
+        })()
+        return () => {
+            unListen?.();
+        }
+    }, []);
+
+
     return (
         <div className={cn(
             'h-full',
@@ -72,32 +140,8 @@ export const DragUploader: FC<{
                 if (!file) {
                     return
                 }
-                setJValues([]);
-                setRawSize(0);
-                setMaxDepth(0);
-                setFileError(null);
                 void (async () => {
-                    try {
-                        const text = await file.text();
-                        const obj = JSON.parse(text)
-                        const list: JValue[] = [];
-                        const maxDepth = {maxDepth: 0}
-                        const size = new Blob([text]).size;
-                        walkValue(undefined, obj, 0, list, maxDepth);
-                        setJValues(list);
-                        setRawSize(size);
-                        setMaxDepth(maxDepth.maxDepth);
-                        triggerEvent(Events.drag_file_success, {
-                            size,
-                            length: list.length,
-                            maxDepth: maxDepth.maxDepth,
-                        }, {flags: [Flags.drag_file]})
-                    } catch (e) {
-                        setFileError(`${e}`);
-                        triggerEvent(Events.drag_file_failed, {
-                            error: `${e}`,
-                        }, {flags: [Flags.drag_file]})
-                    }
+                    setData(await file.text())
                 })()
             }}>
                 {children}
