@@ -17,7 +17,7 @@ export const Search: FC<{
     const [value, setValue] = useState('');
     const [searching, setSearching] = useState<boolean>(false);
     const [hitNodes, setHitNodes] = useState<number[]>([]);
-    const [selectIndex, setSelectIndex] = useState<number>(0);
+    const [selectIndex, setSelectIndex] = useState<number>(-1);
 
 
     useEffect(() => {
@@ -39,7 +39,7 @@ export const Search: FC<{
 
     const search = useCallback((searchStr: string) => {
         setSearching(true);
-        setSelectIndex(0);
+        setSelectIndex(-1);
         setHitNodes([]);
         setTimeout(() => {
             const indexes: number[] = [];
@@ -66,6 +66,9 @@ export const Search: FC<{
                 })
             })
             setHitNodes(indexes);
+            if (indexes.length > 0) {
+                setSelectIndex(0);
+            }
             setSearching(false);
             setTimeout(() => {
                 inputRef.current?.focus();
@@ -84,10 +87,9 @@ export const Search: FC<{
             ref={inputRef}
             prefix={<Spin spinning={searching} indicator={<LoadingOutlined/>}/>}
             suffix={<div className={'flex items-center gap-2'}>
-                {hitNodes.length > 0 && <div>
+                <div>
                     {selectIndex + 1}/{hitNodes.length}
                 </div>
-                }
                 <Button disabled={selectIndex <= 0} onClick={() => {
                     setSelectIndex(prev => prev - 1)
                 }} icon={<ArrowUpOutlined/>}/>
