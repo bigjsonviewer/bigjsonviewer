@@ -1,7 +1,7 @@
 import "./App.css";
 import {JsonViewer} from "./components/JsonViewer.tsx";
 import {AppContext, useAppContext} from "./context.tsx";
-import {FC, useEffect, useMemo, useRef, useState} from "react";
+import {FC, useMemo, useRef, useState} from "react";
 import {DragUploader} from "./components/DragUploader.tsx";
 import {JValue} from "./components/types.ts";
 import prettyBytes from "pretty-bytes";
@@ -21,16 +21,6 @@ function App() {
     const [error, setError] = useState<string | null>(null);
     const treeRef = useRef<VirtuosoHandle>(null);
 
-    useEffect(() => {
-        const keys = new Map<number, boolean>();
-        jValues.forEach((v) => {
-            if (showDepth === -1 || v.depth <= showDepth) {
-                keys.set(v.id, true)
-            }
-        })
-        setExpandKeys(keys)
-    }, [jValues, showDepth]);
-
     return (
         <AppContext.Provider value={{
             treeRef,
@@ -40,8 +30,8 @@ function App() {
             setJValues,
             showDepth,
             setShowDepth,
-            expandKeys,
-            setExpandKeys,
+            foldKeys: expandKeys,
+            setFoldKeys: setExpandKeys,
             maxDepth,
             setMaxDepth,
             fileError: error,

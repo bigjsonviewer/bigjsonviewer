@@ -28,7 +28,6 @@ export type JValue = {
     parent?: JValue;
     separator?: JSeparator;
     hit?: boolean,
-    comma?: boolean,
     path: number[],
 }
 

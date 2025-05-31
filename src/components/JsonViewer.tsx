@@ -1,23 +1,36 @@
-import {FC, useCallback, useMemo} from "react";
+import {FC, useEffect, useMemo} from "react";
 import {Virtuoso} from "react-virtuoso";
 import {useAppContext} from "../context.tsx";
 import {JSeparator, JType, JValue} from "./types.ts";
 import {DownOutlined, RightOutlined} from "@ant-design/icons";
-import {Typography} from "antd";
+import {Tag, Typography} from "antd";
 import {cn} from "../utils/tailwindcss.ts";
 
 
-export const calcExpand = (expandKeys: Map<number, boolean>, node: JValue): boolean => {
-    let expand = true;
+const calcVisible = (foldKeys: Map<number, boolean>, node: JValue, showDepth: number): boolean => {
     let parent = node.parent;
     while (parent) {
-        if (!expandKeys.get(parent.id)) {
-            expand = false;
-            break;
+        if (foldKeys.get(parent.id) === true) {
+            return false
         }
         parent = parent.parent;
     }
-    return expand
+
+    if (node.parent && foldKeys.get(node.parent.id) === false) {
+        return true
+    }
+
+    return showDepth === -1 || (!node.parent || node.parent.depth <= showDepth)
+}
+
+const calcFolded = (foldKeys: Map<number, boolean>, node: JValue, showDepth: number): boolean => {
+    if (foldKeys.has(node.id)) {
+        return foldKeys.get(node.id)!;
+    }
+    if (showDepth !== -1 && node.depth > showDepth) {
+        return true
+    }
+    return false
 }
 
 
@@ -32,36 +45,40 @@ const hasComma = (items: JValue[], i: number) => {
 
 export const JsonViewer: FC = () => {
 
-    const {jValues, showDepth, expandKeys, treeRef} = useAppContext();
+    const {jValues, showDepth, foldKeys, treeRef, setFoldKeys} = useAppContext();
 
     const renderItems = useMemo(() => {
-        const items = jValues.filter(v => calcExpand(expandKeys, v));
-        return items.map((v, i) => ({
-            ...v,
-            comma: hasComma(items, i)
-        }))
-    }, [jValues, showDepth, expandKeys]);
+        return jValues.filter(v => calcVisible(foldKeys, v, showDepth));
+    }, [jValues, showDepth, foldKeys]);
 
-    // console.log('renderItems:', renderItems.map(v => ({
-    //     id: v.id,
-    //     name: v.name,
-    //     separator: v.separator,
-    //     comma: v.comma
-    // })))
+
+    // 清理无需缓存的 key
+    useEffect(() => {
+        setFoldKeys((prev) => {
+            for (const id of prev.keys()) {
+                if (showDepth === -1 || jValues[id].depth <= showDepth) {
+                    prev.delete(id);
+                }
+            }
+            return new Map(prev)
+        })
+    }, [showDepth, jValues, setFoldKeys])
+
 
     return <Virtuoso<JValue>
         className={'h-full min-h-[300px] min-w-[500px]'}
         data={renderItems}
         ref={treeRef}
-        itemContent={(_, node) => {
-            return renderItem(node)
+        itemContent={(i) => {
+            return renderItem(renderItems, i)
         }}
     />
 }
 
 
-const renderItem = (node: JValue) => {
-    return <RenderItem node={node}/>
+const renderItem = (renderItems: JValue[], i: number) => {
+    const comma = hasComma(renderItems, i);
+    return <RenderItem node={renderItems[i]} comma={comma}/>
 }
 
 const prepareHoverParentStyle = (id: number | undefined) => {
@@ -131,7 +148,8 @@ const removeCustomStyles = () => {
 
 const RenderItem: FC<{
     node: JValue,
-}> = ({node}) => {
+    comma: boolean,
+}> = ({node, comma}) => {
 
 
     const indents = node.path.map((id) => (
@@ -162,8 +180,8 @@ const RenderItem: FC<{
     >
         {indents}
         <div className='h-full flex-1'>
-            {node.separator !== undefined ? <RenderSeparator node={node} hasComma={node.comma}/> :
-                <RenderValue node={node} hasComma={node.comma}/>}
+            {node.separator !== undefined ? <RenderSeparator node={node} hasComma={comma}/> :
+                <RenderValue node={node} hasComma={comma}/>}
         </div>
     </div>
 }
@@ -191,39 +209,55 @@ const RenderValue: FC<{
     node: JValue
     hasComma?: boolean,
 }> = ({node, hasComma}) => {
-    const {expandKeys, setExpandKeys, showDepth} = useAppContext();
+    const {foldKeys, setFoldKeys, showDepth} = useAppContext();
 
-    const expanded = !!expandKeys.get(node.id);
+    const folded = calcFolded(foldKeys, node, showDepth)
 
-    const toggle = useCallback((node: JValue) => {
-        setExpandKeys(prev => {
-            if (prev.get(node.id)) {
-                prev.set(node.id, false)
+    const toggle = (node: JValue) => {
+        setFoldKeys(prev => {
+            if (showDepth === -1 || node.depth <= showDepth) {
+                if (prev.get(node.id)) {
+                    if (showDepth === -1 || node.depth <= showDepth) {
+                        prev.delete(node.id)
+                    } else {
+                        prev.set(node.id, false)
+                    }
+                } else {
+                    prev.set(node.id, true)
+                }
             } else {
-                prev.set(node.id, true)
+                // 默认未显示的情况下，点击是展开
+                if (prev.has(node.id) && prev.get(node.id) === false) {
+                    prev.set(node.id, true)
+                } else {
+                    prev.set(node.id, false)
+                }
             }
+            console.log('prev:', prev);
             return new Map<number, boolean>(prev);
         })
-    }, [setExpandKeys, showDepth])
+    }
 
 
     return <div className='h-full flex flex-1 items-center'>
         {[JType.Object, JType.Array].includes(node.type) && <div className='cursor-pointer' onClick={() => {
             toggle(node);
-        }}>{expanded ? <DownOutlined/> : <RightOutlined/>}</div>}
+        }}>{!folded ? <DownOutlined/> : <RightOutlined/>}</div>}
         <div
             className={cn(
                 'flex flex-1 ml-2 items-center justify-between rounded hover:bg-amber-100',
                 '[&:hover_.copy]:visible',
             )}>
             <div className='flex flex-1 '>
+                {/*<Tag color={'green'}>{node.id}</Tag>*/}
+                {/*<Tag>{node.depth}</Tag>*/}
                 <div className={'mr-2'}><RenderJName node={node}/></div>
                 <RenderJValue node={node}/>
                 {node.type !== JType.Object && node.type !== JType.Array && hasComma && <span>,</span>}
                 {node.type === JType.Object &&
-                    <ObjectStartSigns node={node} expanded={expanded} hasComma={hasComma}/>}
+                    <ObjectStartSigns node={node} expanded={!folded} hasComma={hasComma}/>}
                 {node.type === JType.Array &&
-                    <ArrayStartSigns node={node} expanded={expanded} hasComma={hasComma}/>}
+                    <ArrayStartSigns node={node} expanded={!folded} hasComma={hasComma}/>}
             </div>
             <div className={cn(
                 'flex items-center gap-2 text-gray-400',

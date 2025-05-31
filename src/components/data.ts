@@ -1,4 +1,15 @@
-export const testData = `[
+export const testData = `{
+    "pc": 0,
+    "op": 96,
+    "opImmediate": "80",
+    "gas": {
+      "limit": 1474668,
+      "remaining": 1474668,
+      "refund": 0
+    }
+}`;
+
+export const testData2 = `[
   {
     "pc": 0,
     "op": 96,

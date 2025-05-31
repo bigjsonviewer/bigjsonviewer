@@ -13,8 +13,8 @@ export type AppContextProps = {
     setJValues: Dispatch<SetStateAction<JValue[]>>;
     showDepth: number;
     setShowDepth: Dispatch<SetStateAction<number>>;
-    expandKeys: Map<number, boolean>;
-    setExpandKeys: Dispatch<SetStateAction<Map<number, boolean>>>;
+    foldKeys: Map<number, boolean>;
+    setFoldKeys: Dispatch<SetStateAction<Map<number, boolean>>>;
     fileError: string | null;
     setFileError: Dispatch<SetStateAction<string | null>>;
 }

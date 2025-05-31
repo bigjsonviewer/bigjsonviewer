@@ -20,19 +20,6 @@ const props: UploadProps = {
     beforeUpload() {
         return false
     },
-    // action: '',
-    // onChange(info) {
-    //     console.log('change', info)
-    //     const {status} = info.file;
-    //     if (status !== 'uploading') {
-    //         console.log(info.file, info.fileList);
-    //     }
-    //     if (status === 'done') {
-    //         message.success(`${info.file.name} file uploaded successfully.`);
-    //     } else if (status === 'error') {
-    //         message.error(`${info.file.name} file upload failed.`);
-    //     }
-    // },
     openFileDialogOnClick: false,
 };
 
