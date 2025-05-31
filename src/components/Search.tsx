@@ -1,33 +1,24 @@
 import {ArrowDownOutlined, ArrowUpOutlined, LoadingOutlined} from "@ant-design/icons";
 import {Button, Input, InputRef, Spin} from "antd";
-import {useCallback, useEffect, useRef, useState} from "react";
+import {FC, RefObject, useCallback, useEffect, useState} from "react";
 import {useAppContext} from "../context.tsx";
-import {useDebounce, useMount} from "ahooks";
+import {useDebounce} from "ahooks";
 // import {calcExpand} from "./JsonViewer.tsx";
 
 const renderHitText = (str: string) => {
     return `<span class="hit">${str}</span>`
 }
 
-export const Search = () => {
+export const Search: FC<{
+    inputRef: RefObject<InputRef>,
+}> = ({inputRef}) => {
 
     const {setJValues, treeRef} = useAppContext();
     const [value, setValue] = useState('');
     const [searching, setSearching] = useState<boolean>(false);
     const [hitNodes, setHitNodes] = useState<number[]>([]);
     const [selectIndex, setSelectIndex] = useState<number>(0);
-    const ref = useRef<InputRef>(null);
 
-    useMount(() => {
-        document.addEventListener('keydown', function (event) {
-            const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
-            const isCtrlOrCmd = isMac ? event.metaKey : event.ctrlKey;
-            if (isCtrlOrCmd && event.key.toLowerCase() === 'f') {
-                event.preventDefault();
-                ref.current?.focus();
-            }
-        });
-    })
 
     useEffect(() => {
         // console.log('hitIndex:', selectIndex, hitNodes[selectIndex]);
@@ -77,7 +68,7 @@ export const Search = () => {
             setHitNodes(indexes);
             setSearching(false);
             setTimeout(() => {
-                ref.current?.focus();
+                inputRef.current?.focus();
             }, 0);
         }, 0)
     }, [value, setJValues]);
@@ -90,7 +81,7 @@ export const Search = () => {
 
     return <div className='w-[450px] flex items-center gap-2'>
         <Input
-            ref={ref}
+            ref={inputRef}
             prefix={<Spin spinning={searching} indicator={<LoadingOutlined/>}/>}
             suffix={<div className={'flex items-center gap-2'}>
                 {hitNodes.length > 0 && <div>

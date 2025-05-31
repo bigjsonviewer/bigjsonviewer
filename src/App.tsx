@@ -6,9 +6,10 @@ import {cn} from "./lib/utils.ts";
 import {DragUploader} from "./components/DragUploader.tsx";
 import {JValue} from "./components/types.ts";
 import prettyBytes from "pretty-bytes";
-import {Select, SelectProps} from "antd";
+import {InputRef, Select, SelectProps} from "antd";
 import {Search} from "./components/Search.tsx";
 import {VirtuosoHandle} from "react-virtuoso";
+import {useMount} from "ahooks";
 
 function App() {
 
@@ -64,6 +65,18 @@ export default App;
 
 const Header: FC = () => {
     const {rawSize, maxDepth, showDepth, setShowDepth} = useAppContext();
+    const ref = useRef<InputRef>(null);
+
+    useMount(() => {
+        document.addEventListener('keydown', function (event) {
+            const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+            const isCtrlOrCmd = isMac ? event.metaKey : event.ctrlKey;
+            if (isCtrlOrCmd && event.key.toLowerCase() === 'f') {
+                event.preventDefault();
+                ref.current?.focus();
+            }
+        });
+    })
 
     const options = useMemo(() => {
         const list: SelectProps['options'] = [{
@@ -82,28 +95,28 @@ const Header: FC = () => {
     return <div className='flex justify-between items-center p-2 border-b border-gray-200'>
         <div className='flex gap-4 items-center'>
             <strong>Big JSON Viewer</strong>
-            <Search/>
-        </div>
-        {rawSize > 0 && <div className='flex gap-4 items-center'>
-            <div className='flex gap-2'>
-                <span>size:</span>
-                <span>
+            {rawSize > 0 && <div className='flex gap-4 items-center'>
+                <div className='flex gap-2'>
+                    <span>size:</span>
+                    <span>
                 {prettyBytes(rawSize)}
                 </span>
-            </div>
-            {/*<RawViewer/>*/}
-            <div className='flex gap-2 items-center'>
-                Depth:
-                <Select
-                    className='w-[80px]'
-                    value={showDepth}
-                    onChange={(value) => {
-                        setShowDepth(value);
-                    }}
-                    options={options}
-                />
-            </div>
-        </div>}
+                </div>
+                {/*<RawViewer/>*/}
+                <div className='flex gap-2 items-center'>
+                    Depth:
+                    <Select
+                        className='w-[80px]'
+                        value={showDepth}
+                        onChange={(value) => {
+                            setShowDepth(value);
+                        }}
+                        options={options}
+                    />
+                </div>
+            </div>}
+        </div>
+        {rawSize > 0 && <Search inputRef={ref}/>}
     </div>
 }
 

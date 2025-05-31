@@ -8,7 +8,6 @@ import {Events, Flags, triggerEvent} from "../events.ts";
 import {getCurrentWebview} from "@tauri-apps/api/webview";
 import type {UnlistenFn} from "@tauri-apps/api/event";
 import {BaseDirectory, readFile} from "@tauri-apps/plugin-fs";
-import {platform} from "@tauri-apps/plugin-os";
 import {isApp} from "../utils/isApp.ts";
 
 
