@@ -7,7 +7,7 @@ import {DownOutlined, RightOutlined} from "@ant-design/icons";
 import {Typography} from "antd";
 
 
-const calcExpand = (expandKeys: Map<number, boolean>, node: JValue): boolean => {
+export const calcExpand = (expandKeys: Map<number, boolean>, node: JValue): boolean => {
     let expand = true;
     let parent = node.parent;
     while (parent) {

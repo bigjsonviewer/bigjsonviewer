@@ -2,7 +2,8 @@ import {ArrowDownOutlined, ArrowUpOutlined, LoadingOutlined} from "@ant-design/i
 import {Button, Input, InputRef, Spin} from "antd";
 import {useCallback, useEffect, useRef, useState} from "react";
 import {useAppContext} from "../context.tsx";
-import {useDebounce} from "ahooks";
+import {useDebounce, useMount} from "ahooks";
+// import {calcExpand} from "./JsonViewer.tsx";
 
 const renderHitText = (str: string) => {
     return `<span class="hit">${str}</span>`
@@ -17,10 +18,30 @@ export const Search = () => {
     const [selectIndex, setSelectIndex] = useState<number>(0);
     const ref = useRef<InputRef>(null);
 
+    useMount(() => {
+        document.addEventListener('keydown', function (event) {
+            const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+            const isCtrlOrCmd = isMac ? event.metaKey : event.ctrlKey;
+            if (isCtrlOrCmd && event.key.toLowerCase() === 'f') {
+                event.preventDefault();
+                ref.current?.focus();
+            }
+        });
+    })
+
     useEffect(() => {
         // console.log('hitIndex:', selectIndex, hitNodes[selectIndex]);
         const id = hitNodes[selectIndex];
         if (id !== undefined) {
+            // const expand = calcExpand(expandKeys, jValues[id])
+            // if (!expand) {
+            //     let parent = jValues[id]?.parent;
+            //     while (parent) {
+            //         expandKeys.set(parent.id, true);
+            //         parent = parent.parent;
+            //     }
+            //     setExpandKeys(new Map<number, boolean>(expandKeys));
+            // }
             treeRef.current?.scrollToIndex(id);
         }
     }, [selectIndex, hitNodes]);
