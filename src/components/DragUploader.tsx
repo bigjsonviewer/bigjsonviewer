@@ -61,7 +61,9 @@ export const DragUploader: FC<{
     };
 
     useEffect(() => {
-        setData(testData);
+        if (!import.meta.env.PROD) {
+            setData(testData);
+        }
         if (!isApp()) {
             return
         }
