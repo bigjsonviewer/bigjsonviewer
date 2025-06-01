@@ -274,7 +274,6 @@ const RenderValue: FC<{
                 'flex items-center gap-2 text-gray-400',
             )}>
                 {node.children && <span>{node.children.length} items</span>}
-                {node.elems && <span>{node.elems.length} items</span>}
                 <span className='copy invisible'>
                     <Typography.Text className={cn(
                         '[&_.anticon-copy]:!text-gray-400'
@@ -405,7 +404,7 @@ const ArrayStartSigns: FC<{
     if (expanded) {
         return <span>{'['}</span>
     }
-    if (node.elems!.length === 0) {
+    if (node.children!.length === 0) {
         return <div>{'[]'}{hasComma && <span>,</span>}</div>
     }
     return <div>{'[ ... ]'}{hasComma && <span>,</span>}</div>

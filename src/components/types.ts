@@ -20,9 +20,7 @@ export type JValue = {
     value?: string;
     searchValue?: string;
     type: JType;
-    repeated?: boolean;
     children?: JValue[];
-    elems?: JValue[];
     raw: unknown;
     depth: number;
     parent?: JValue;
@@ -69,11 +67,10 @@ export const walkValue = (parent: JValue | undefined, obj: unknown, depth: numbe
             break
         }
         case JType.Array: {
-            v.repeated = true;
-            v.elems = [];
+            v.children = [];
             (obj as unknown[]).forEach((item: unknown) => {
                 const vv = walkValue(v, item, depth + 1, list, maxDepth);
-                v.elems!.push(vv);
+                v.children!.push(vv);
             })
             addSeparator(list, v, JSeparator.ArrayEnd)
             break
