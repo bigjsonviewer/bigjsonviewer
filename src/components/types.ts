@@ -14,14 +14,14 @@ export enum JSeparator {
 }
 
 export type JValue = {
-    id: number;
+    id: string;
     name?: string;
     searchName?: string;
     value?: string;
     searchValue?: string;
     type: JType;
     children?: JValue[];
-    raw: unknown;
+    // raw: unknown;
     depth: number;
     parent?: JValue;
     separator?: JSeparator;
@@ -34,7 +34,7 @@ const addSeparator = (list: JValue[], node: JValue, separator: JSeparator) => {
     list.push({
         ...node,
         separator,
-        id: list.length + 1,
+        id: `${list.length + 1}`,
         depth: node.depth + 1,
         parent: node,
     })
@@ -43,13 +43,13 @@ const addSeparator = (list: JValue[], node: JValue, separator: JSeparator) => {
 export const walkValue = (parent: JValue | undefined, obj: unknown, depth: number, list: JValue[], maxDepth: {
     maxDepth: number
 }): JValue => {
-    const id = list.length + 1
+    const id = `${list.length + 1}`
     const v: JValue = {
         id,
         parent,
         depth,
         type: checkType(obj),
-        raw: obj,
+        // raw: obj,
     }
     list.push(v);
     if (depth > maxDepth.maxDepth) {
@@ -80,6 +80,9 @@ export const walkValue = (parent: JValue | undefined, obj: unknown, depth: numbe
         case JType.Boolean:
         case JType.Null: {
             v.value = `${obj}`;
+            if(v.value.length > 100){
+                v.value = `${v.value.slice(0,100)}...`
+            }
             break
         }
     }

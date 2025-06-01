@@ -36,5 +36,46 @@ body {
     color: #1a01cc;
 }
 
+/* for tree */
 
+.callTraceTree div[aria-selected="true"] {
+    background: #e9f3ffd9;
+}
+
+.callTraceTree div[role="treeitem"]:has(.searchHighlight) {
+    background: #ddd;
+}
+
+.treeIndentLines {
+    display: flex;
+    --indent-size: 15px;
+
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    align-items: flex-start;
+    height: 100%;
+}
+
+/*.treeArrow {*/
+/*    width: 14px;*/
+/*    height: 14px;*/
+/*    background: #1f1f1f;*/
+/*    display: flex;*/
+/*    justify-content: center;*/
+/*    align-items: center;*/
+/*    margin-right: 12px;*/
+/*    border: 1px solid #e4e4e4;*/
+/*}*/
+
+.callTraceNode {
+    position: relative;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    margin: 0 20px;
+    height: 100%;
+    cursor: default;
+}
 

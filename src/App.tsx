@@ -1,5 +1,4 @@
 import "./App.css";
-import {JsonViewer} from "./components/JsonViewer.tsx";
 import {AppContext, useAppContext} from "./context.tsx";
 import {FC, useMemo, useRef, useState} from "react";
 import {DragUploader} from "./components/DragUploader.tsx";
@@ -10,6 +9,8 @@ import {Search} from "./components/Search.tsx";
 import {VirtuosoHandle} from "react-virtuoso";
 import {useMount} from "ahooks";
 import {cn} from "./utils/tailwindcss.ts";
+// import {JsonViewer} from "./components/JsonViewer.tsx";
+import {JsonViewer2} from "./components/JsonViewer2.tsx";
 
 function App() {
 
@@ -43,7 +44,8 @@ function App() {
                 <Header/>
                 <div className='flex-1 h-full'>
                     <DragUploader>
-                        {jValues.length > 0 ? <JsonViewer/> : <NoData/>}
+                        {/*{jValues.length > 0 ? <JsonViewer/> : <NoData/>}*/}
+                        {jValues.length > 0 ? <JsonViewer2/> : <NoData/>}
                     </DragUploader>
                 </div>
             </div>
