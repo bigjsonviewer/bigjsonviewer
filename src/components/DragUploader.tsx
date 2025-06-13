@@ -9,7 +9,7 @@ import type {UnlistenFn} from "@tauri-apps/api/event";
 import {BaseDirectory, readFile} from "@tauri-apps/plugin-fs";
 import {isApp} from "../utils/isApp.ts";
 import {cn} from "../utils/tailwindcss.ts";
-import { testData2} from "./data.ts";
+import {testData2} from "./data.ts";
 
 
 const {Dragger} = Upload;
@@ -43,7 +43,7 @@ export const DragUploader: FC<{
             const list: JValue[] = [];
             const maxDepth = {maxDepth: 0}
             const size = new Blob([text]).size;
-            walkValue(undefined, obj, 0, list, maxDepth);
+            list.push(walkValue(0, undefined, obj, 0, maxDepth));
             setJValues(list);
             setRawSize(size);
             setMaxDepth(maxDepth.maxDepth);

@@ -30,20 +30,21 @@ export type JValue = {
 
 export const BlockTypes = [JType.Object, JType.Array]
 
-const addSeparator = (list: JValue[], node: JValue, separator: JSeparator) => {
-    list.push({
-        ...node,
-        separator,
-        id: list.length + 1,
-        depth: node.depth + 1,
-        parent: node,
-    })
-    return
-}
-export const walkValue = (parent: JValue | undefined, obj: unknown, depth: number, list: JValue[], maxDepth: {
+// const addSeparator = (list: JValue[], node: JValue, separator: JSeparator) => {
+//     list.push({
+//         ...node,
+//         separator,
+//         id: list.length + 1,
+//         depth: node.depth + 1,
+//         parent: node,
+//     })
+//     return
+// }
+export const walkValue = (id:number,parent: JValue | undefined, obj: unknown, depth: number, maxDepth: {
     maxDepth: number
 }): JValue => {
-    const id = list.length + 1
+    // const id = list.length + 1
+    id++;
     const v: JValue = {
         id,
         parent,
@@ -51,7 +52,7 @@ export const walkValue = (parent: JValue | undefined, obj: unknown, depth: numbe
         type: checkType(obj),
         raw: obj,
     }
-    list.push(v);
+    // list.push(v);
     if (depth > maxDepth.maxDepth) {
         maxDepth.maxDepth = depth;
     }
@@ -59,20 +60,20 @@ export const walkValue = (parent: JValue | undefined, obj: unknown, depth: numbe
         case JType.Object: {
             v.children = []
             for (const key in obj as object) {
-                const vv = walkValue(v, (obj as Record<string, unknown>)[key], depth + 1, list, maxDepth);
+                const vv = walkValue(id,v, (obj as Record<string, unknown>)[key], depth + 1, maxDepth);
                 vv.name = key;
                 v.children.push(vv);
             }
-            addSeparator(list, v, JSeparator.ObjectEnd)
+            // addSeparator(list, v, JSeparator.ObjectEnd)
             break
         }
         case JType.Array: {
             v.children = [];
             (obj as unknown[]).forEach((item: unknown) => {
-                const vv = walkValue(v, item, depth + 1, list, maxDepth);
+                const vv = walkValue(id,v, item, depth + 1, maxDepth);
                 v.children!.push(vv);
             })
-            addSeparator(list, v, JSeparator.ArrayEnd)
+            // addSeparator(list, v, JSeparator.ArrayEnd)
             break
         }
         case JType.String:
