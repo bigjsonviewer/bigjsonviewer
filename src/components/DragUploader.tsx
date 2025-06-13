@@ -9,7 +9,7 @@ import type {UnlistenFn} from "@tauri-apps/api/event";
 import {BaseDirectory, readFile} from "@tauri-apps/plugin-fs";
 import {isApp} from "../utils/isApp.ts";
 import {cn} from "../utils/tailwindcss.ts";
-import {testData} from "./data.ts";
+import { testData2} from "./data.ts";
 
 
 const {Dragger} = Upload;
@@ -62,7 +62,7 @@ export const DragUploader: FC<{
 
     useEffect(() => {
         if (!import.meta.env.PROD) {
-            setData(testData);
+            setData(testData2);
         }
         if (!isApp()) {
             return

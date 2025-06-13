@@ -259,7 +259,7 @@ const RenderValue: FC<{
                 'flex flex-1 ml-2 items-center justify-between rounded hover:bg-amber-100',
                 '[&:hover_.copy]:visible',
             )}>
-            <div className='flex flex-1 '>
+            <div className='flex flex-1'>
                 {/*<Tag color={'green'}>{node.id}</Tag>*/}
                 {/*<Tag>{node.depth}</Tag>*/}
                 <div className={'mr-2'}><RenderJName node={node}/></div>

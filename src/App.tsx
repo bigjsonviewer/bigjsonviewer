@@ -16,7 +16,7 @@ function App() {
     const [rawSize, setRawSize] = useState(0);
     const [jValues, setJValues] = useState<JValue[]>([]);
     const [maxDepth, setMaxDepth] = useState(0);
-    const [showDepth, setShowDepth] = useState(0);
+    const [showDepth, setShowDepth] = useState(-1);
     const [expandKeys, setExpandKeys] = useState<Map<number, boolean>>(new Map<number, boolean>());
     const [error, setError] = useState<string | null>(null);
     const treeRef = useRef<VirtuosoHandle>(null);
