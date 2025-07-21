@@ -84,7 +84,7 @@ const Header: FC = () => {
 
     return <div className='flex justify-between items-center p-2 border-b border-gray-200'>
         <div className='flex gap-4 items-center'>
-            <strong>Big JSON Viewer</strong>
+            <strong>VList</strong>
             {rawSize > 0 && <div className='flex gap-4 items-center'>
                 <div className='flex gap-2'>
                     <span>size:</span>

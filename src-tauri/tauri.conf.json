@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Big JSON Viewer",
+        "title": "VList",
         "width": 1200,
         "height": 800
       }
