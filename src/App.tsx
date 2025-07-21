@@ -19,7 +19,7 @@ function App() {
     const [showDepth, setShowDepth] = useState(-1);
     const [expandKeys, setExpandKeys] = useState<Map<number, boolean>>(new Map<number, boolean>());
     const [error, setError] = useState<string | null>(null);
-    const treeRef = useRef<VirtuosoHandle>(null);
+    const treeRef = useRef<VirtuosoHandle>({} as VirtuosoHandle);
 
     return (
         <AppContext.Provider value={{
@@ -55,7 +55,7 @@ export default App;
 
 const Header: FC = () => {
     const {jValues, rawSize, maxDepth, showDepth, setShowDepth} = useAppContext();
-    const ref = useRef<InputRef>(null);
+    const ref = useRef<InputRef>({} as InputRef);
 
     useMount(() => {
         document.addEventListener('keydown', function (event) {

@@ -10,7 +10,7 @@ const renderHitText = (str: string) => {
 }
 
 export const Search: FC<{
-    inputRef: RefObject<InputRef | null>,
+    inputRef: RefObject<InputRef>,
 }> = ({inputRef}) => {
 
     const {setJValues, treeRef} = useAppContext();
