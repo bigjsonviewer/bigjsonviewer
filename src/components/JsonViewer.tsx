@@ -66,14 +66,16 @@ export const JsonViewer: FC = () => {
         foldKeys,
     }), [jValues, showDepth, foldKeys]);
 
+
     useEffect(() => {
         console.log('renderItemsFactor update:', renderItemsFactor)
     }, [renderItemsFactor])
 
     const renderItems = useMemo(() => {
+        const {jValues, foldKeys, showDepth} = renderItemsFactor;
         console.log('start calc render items')
         const t = ElapsedTime.start('calc visible items')
-        const r = renderItemsFactor.jValues.filter(v => calcVisible(renderItemsFactor.foldKeys, v, renderItemsFactor.showDepth));
+        const r = jValues.filter(v => calcVisible(foldKeys, v, showDepth));
         t.end()
         return r;
     }, [renderItemsFactor]);
@@ -85,16 +87,17 @@ export const JsonViewer: FC = () => {
 
     // 清理无需缓存的 key
     useEffect(() => {
-        setFoldKeys((prev) => {
-            for (const id of prev.keys()) {
-                if (showDepth === -1 || jValues[id].depth > showDepth) {
-                    prev.delete(id);
+        if (foldKeys.size > 1000) {
+            setFoldKeys((prev) => {
+                for (const id of prev.keys()) {
+                    if (showDepth === -1 || jValues[id].depth > showDepth) {
+                        prev.delete(id);
+                    }
                 }
-            }
-            // console.log(prev)
-            return new Map(prev)
-        })
-    }, [showDepth, jValues, setFoldKeys])
+                return new Map(prev)
+            })
+        }
+    }, [showDepth, jValues, foldKeys, setFoldKeys])
 
 
     return <Virtuoso<JValue>

@@ -35,9 +35,6 @@ export const DragUploader: FC<{
 
     const setData = (text: string) => {
         setDragging(false);
-        setJValues([]);
-        setRawSize(0);
-        setMaxDepth(0);
         setFileError(null);
         try {
             const t1 = ElapsedTime.start('parse json')
@@ -61,6 +58,9 @@ export const DragUploader: FC<{
                 maxDepth: maxDepth.maxDepth,
             }, {flags: [Flags.drag_file]})
         } catch (e) {
+            setJValues([]);
+            setRawSize(0);
+            setMaxDepth(0);
             console.error('parse error:', e);
             setFileError(`${e}`);
             triggerEvent(Events.drag_file_failed, {
