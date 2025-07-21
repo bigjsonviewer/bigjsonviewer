@@ -1,8 +1,9 @@
 import {ArrowDownOutlined, ArrowUpOutlined, CloseOutlined, LoadingOutlined} from "@ant-design/icons";
+import {useDebounce} from "ahooks";
 import {Button, Input, InputRef, Spin} from "antd";
 import {FC, RefObject, useCallback, useEffect, useState} from "react";
+
 import {useAppContext} from "../context.tsx";
-import {useDebounce} from "ahooks";
 // import {calcExpand} from "./JsonViewer.tsx";
 
 const renderHitText = (str: string) => {
@@ -16,7 +17,7 @@ export const Search: FC<{
     const {setJValues, treeRef} = useAppContext();
     const [value, setValue] = useState('');
     const [searching, setSearching] = useState<boolean>(false);
-    const [hitNodes, setHitNodes] = useState<number[]>([]);
+    const [hitNodes, setHitNodes] = useState<Array<number>>([]);
     const [selectIndex, setSelectIndex] = useState<number>(-1);
 
 
@@ -35,14 +36,14 @@ export const Search: FC<{
             // }
             treeRef.current?.scrollToIndex(id);
         }
-    }, [selectIndex, hitNodes]);
+    }, [selectIndex, hitNodes, treeRef]);
 
     const search = useCallback((searchStr: string) => {
         setSearching(true);
         setSelectIndex(-1);
         setHitNodes([]);
         setTimeout(() => {
-            const indexes: number[] = [];
+            const indexes: Array<number> = [];
             setJValues(prev => {
                 return prev.map((item, index) => {
                     let hit = false;
@@ -74,12 +75,13 @@ export const Search: FC<{
                 inputRef.current?.focus();
             }, 0);
         }, 0)
-    }, [value, setJValues]);
+    }, [setJValues, inputRef]);
 
     const debounce = useDebounce(value, {wait: 500});
+
     useEffect(() => {
         search(debounce);
-    }, [debounce]);
+    }, [debounce, search]);
 
 
     return <div className='w-[450px] flex items-center gap-2'>

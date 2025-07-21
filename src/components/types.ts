@@ -20,7 +20,7 @@ export type JValue = {
     value?: string;
     searchValue?: string;
     type: JType;
-    children?: JValue[];
+    children?: Array<JValue>;
     raw: unknown;
     depth: number;
     parent?: JValue;
@@ -30,7 +30,7 @@ export type JValue = {
 
 export const BlockTypes = [JType.Object, JType.Array]
 
-const addSeparator = (list: JValue[], node: JValue, separator: JSeparator) => {
+const addSeparator = (list: Array<JValue>, node: JValue, separator: JSeparator) => {
     list.push({
         ...node,
         separator,
@@ -40,7 +40,7 @@ const addSeparator = (list: JValue[], node: JValue, separator: JSeparator) => {
     })
     return
 }
-export const walkValue = (parent: JValue | undefined, obj: unknown, depth: number, list: JValue[], maxDepth: {
+export const walkValue = (parent: JValue | undefined, obj: unknown, depth: number, list: Array<JValue>, maxDepth: {
     maxDepth: number
 }): JValue => {
     const id = list.length + 1
@@ -68,7 +68,7 @@ export const walkValue = (parent: JValue | undefined, obj: unknown, depth: numbe
         }
         case JType.Array: {
             v.children = [];
-            (obj as unknown[]).forEach((item: unknown) => {
+            (obj as Array<unknown>).forEach((item: unknown) => {
                 const vv = walkValue(v, item, depth + 1, list, maxDepth);
                 v.children!.push(vv);
             })

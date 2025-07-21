@@ -1,16 +1,18 @@
-import {FC, ReactNode, useEffect, useState} from 'react';
+import type {UnlistenFn} from "@tauri-apps/api/event";
+import {getCurrentWebview} from "@tauri-apps/api/webview";
+import {BaseDirectory, readFile} from "@tauri-apps/plugin-fs";
 import type {UploadProps} from 'antd';
+// eslint-disable-next-line no-duplicate-imports
 import {Upload} from 'antd';
-import {JValue, walkValue} from "./types.ts";
+import {FC, ReactNode, useCallback, useEffect, useState} from 'react';
+
 import {useAppContext} from "../context.tsx";
 import {Events, Flags, triggerEvent} from "../events.ts";
-import {getCurrentWebview} from "@tauri-apps/api/webview";
-import type {UnlistenFn} from "@tauri-apps/api/event";
-import {BaseDirectory, readFile} from "@tauri-apps/plugin-fs";
+import {ElapsedTime} from "../utils.ts";
 import {isApp} from "../utils/isApp.ts";
 import {cn} from "../utils/tailwindcss.ts";
 import {testData2} from "./data.ts";
-import {ElapsedTime} from "../utils.ts";
+import {JValue, walkValue} from "./types.ts";
 
 
 const {Dragger} = Upload;
@@ -33,7 +35,7 @@ export const DragUploader: FC<{
     const [dragging, setDragging] = useState(false);
     const {setJValues, setRawSize, setMaxDepth, setFileError} = useAppContext()
 
-    const setData = (text: string) => {
+    const setData = useCallback((text: string) => {
         setDragging(false);
         setFileError(null);
         try {
@@ -41,7 +43,7 @@ export const DragUploader: FC<{
             const obj = JSON.parse(text)
             t1.end()
 
-            const list: JValue[] = [];
+            const list: Array<JValue> = [];
             const maxDepth = {maxDepth: 0}
             const size = new Blob([text]).size;
 
@@ -67,7 +69,7 @@ export const DragUploader: FC<{
                 error: `${e}`,
             }, {flags: [Flags.drag_file]})
         }
-    };
+    }, [setFileError, setJValues, setMaxDepth, setRawSize]);
 
     useEffect(() => {
         if (!import.meta.env.PROD) {
@@ -101,7 +103,7 @@ export const DragUploader: FC<{
         return () => {
             unListen?.();
         }
-    }, []);
+    }, [setData]);
 
 
     return (

@@ -1,11 +1,12 @@
-import {Dispatch, FC, SetStateAction, useEffect, useMemo} from "react";
-import {Virtuoso} from "react-virtuoso";
-import {useAppContext} from "../context.tsx";
-import {JSeparator, JType, JValue} from "./types.ts";
 import {DownOutlined, RightOutlined} from "@ant-design/icons";
 import {Typography} from "antd";
-import {cn} from "../utils/tailwindcss.ts";
+import {Dispatch, FC, SetStateAction, useEffect, useMemo} from "react";
+import {Virtuoso} from "react-virtuoso";
+
+import {useAppContext} from "../context.tsx";
 import {ElapsedTime} from "../utils.ts";
+import {cn} from "../utils/tailwindcss.ts";
+import {JSeparator, JType, JValue} from "./types.ts";
 
 
 const calcVisible = (foldKeys: Map<number, boolean>, node: JValue, showDepth: number): boolean => {
@@ -32,7 +33,7 @@ const calcFolded = (foldKeys: Map<number, boolean>, node: JValue, showDepth: num
 }
 
 
-const hasComma = (items: JValue[], i: number) => {
+const hasComma = (items: Array<JValue>, i: number) => {
     const node = items[i];
     const notLast = (() => {
         return items[i + 1] !== undefined && items[i + 1].separator === undefined;
@@ -45,20 +46,6 @@ export const JsonViewer: FC = () => {
 
     const {jValues, showDepth, foldKeys, treeRef, setFoldKeys} = useAppContext();
 
-    console.log('JsonViewer render')
-
-    useEffect(() => {
-        console.log('jValues update:', jValues.length)
-    }, [jValues]);
-
-    useEffect(() => {
-        console.log('showDepth update:', showDepth)
-    }, [showDepth]);
-
-    useEffect(() => {
-        console.log('foldKeys update:', foldKeys)
-    }, [foldKeys])
-
 
     const renderItemsFactor = useMemo(() => ({
         jValues,
@@ -67,23 +54,14 @@ export const JsonViewer: FC = () => {
     }), [jValues, showDepth, foldKeys]);
 
 
-    useEffect(() => {
-        console.log('renderItemsFactor update:', renderItemsFactor)
-    }, [renderItemsFactor])
-
     const renderItems = useMemo(() => {
         const {jValues, foldKeys, showDepth} = renderItemsFactor;
-        console.log('start calc render items')
         const t = ElapsedTime.start('calc visible items')
         const r = jValues.filter(v => calcVisible(foldKeys, v, showDepth));
         t.end()
         return r;
     }, [renderItemsFactor]);
 
-
-    useEffect(() => {
-        console.log('renderItems update:', renderItems.length)
-    }, [renderItems])
 
     // 清理无需缓存的 key
     useEffect(() => {
@@ -144,7 +122,7 @@ const prepareHoverBlockStyle = (id: number | undefined) => {
 const handleHoverEvent = (node: JValue) => {
     const style = document.createElement('style');
     style.setAttribute('s', 'bjv');
-    const styles: string[] = []
+    const styles: Array<string> = []
     let parent = node.parent;
     while (parent) {
         styles.push(prepareHoverParentStyle(parent.id))
@@ -166,7 +144,7 @@ const handleIdentHoverEvent = (id: number | undefined) => {
     }
     const style = document.createElement('style');
     style.setAttribute('s', 'bjv');
-    const styles: string[] = []
+    const styles: Array<string> = []
     styles.push(prepareHoverBlockStyle(id))
     style.innerHTML = styles.join('\n');
     document.head.appendChild(style);
@@ -187,7 +165,7 @@ const RenderItem: FC<{
 }> = ({node, comma}) => {
 
     const indents = (() => {
-        const paths: number[] = [];
+        const paths: Array<number> = [];
         let parent = node.parent;
         while (parent) {
             paths.push(parent.id)
@@ -271,7 +249,6 @@ const toggle = (setFoldKeys: Dispatch<SetStateAction<Map<number, boolean>>>, nod
                 prev.set(node.id, false)
             }
         }
-        // console.log('prev:', prev);
         return new Map<number, boolean>(prev);
     })
 }

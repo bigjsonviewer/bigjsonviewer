@@ -1,6 +1,7 @@
 import {createContext, Dispatch, RefObject, SetStateAction, useContext} from "react";
-import {JValue} from "./components/types.ts";
 import {VirtuosoHandle} from "react-virtuoso";
+
+import {JValue} from "./components/types.ts";
 
 
 export type AppContextProps = {
@@ -9,8 +10,8 @@ export type AppContextProps = {
     setRawSize: Dispatch<SetStateAction<number>>;
     maxDepth: number;
     setMaxDepth: Dispatch<SetStateAction<number>>;
-    jValues: JValue[];
-    setJValues: Dispatch<SetStateAction<JValue[]>>;
+    jValues: Array<JValue>;
+    setJValues: Dispatch<SetStateAction<Array<JValue>>>;
     showDepth: number;
     setShowDepth: Dispatch<SetStateAction<number>>;
     foldKeys: Map<number, boolean>;

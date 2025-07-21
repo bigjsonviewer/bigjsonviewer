@@ -1,20 +1,22 @@
 import "./App.css";
-import {JsonViewer} from "./components/JsonViewer.tsx";
-import {AppContext, useAppContext} from "./context.tsx";
-import {FC, useMemo, useRef, useState} from "react";
-import {DragUploader} from "./components/DragUploader.tsx";
-import {JValue} from "./components/types.ts";
-import prettyBytes from "pretty-bytes";
-import {InputRef, Select, SelectProps} from "antd";
-import {Search} from "./components/Search.tsx";
-import {VirtuosoHandle} from "react-virtuoso";
+
 import {useMount} from "ahooks";
+import {InputRef, Select, SelectProps} from "antd";
+import prettyBytes from "pretty-bytes";
+import {FC, useMemo, useRef, useState} from "react";
+import {VirtuosoHandle} from "react-virtuoso";
+
+import {DragUploader} from "./components/DragUploader.tsx";
+import {JsonViewer} from "./components/JsonViewer.tsx";
+import {Search} from "./components/Search.tsx";
+import {JValue} from "./components/types.ts";
+import {AppContext, useAppContext} from "./context.tsx";
 import {cn} from "./utils/tailwindcss.ts";
 
 function App() {
 
     const [rawSize, setRawSize] = useState(0);
-    const [jValues, setJValues] = useState<JValue[]>([]);
+    const [jValues, setJValues] = useState<Array<JValue>>([]);
     const [maxDepth, setMaxDepth] = useState(0);
     const [showDepth, setShowDepth] = useState(-1);
     const [expandKeys, setExpandKeys] = useState<Map<number, boolean>>(new Map<number, boolean>());
