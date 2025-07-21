@@ -1,10 +1,10 @@
-import {createContext, Dispatch,  RefObject, SetStateAction, useContext} from "react";
+import {createContext, Dispatch, RefObject, SetStateAction, useContext} from "react";
 import {JValue} from "./components/types.ts";
 import {VirtuosoHandle} from "react-virtuoso";
 
 
 export type AppContextProps = {
-    treeRef:RefObject<VirtuosoHandle | null>;
+    treeRef: RefObject<VirtuosoHandle>;
     rawSize: number;
     setRawSize: Dispatch<SetStateAction<number>>;
     maxDepth: number;
