@@ -5,6 +5,7 @@ import {JSeparator, JType, JValue} from "./types.ts";
 import {DownOutlined, RightOutlined} from "@ant-design/icons";
 import {Typography} from "antd";
 import {cn} from "../utils/tailwindcss.ts";
+import {ElapsedTime} from "../utils.ts";
 
 
 const calcVisible = (foldKeys: Map<number, boolean>, node: JValue, showDepth: number): boolean => {
@@ -44,9 +45,38 @@ export const JsonViewer: FC = () => {
 
     const {jValues, showDepth, foldKeys, treeRef, setFoldKeys} = useAppContext();
 
+    console.log('JsonViewer render')
+
+    useEffect(() => {
+        console.log('jValues update:', jValues.length)
+    }, [jValues]);
+
+    useEffect(() => {
+        console.log('showDepth update:', showDepth)
+    }, [showDepth]);
+
+    useEffect(() => {
+        console.log('foldKeys update:', foldKeys)
+    }, [foldKeys])
+
+
+    const renderItemsFactor = useMemo(() => ({
+        jValues,
+        showDepth,
+        foldKeys,
+    }), [jValues, showDepth, foldKeys]);
+
+    useEffect(() => {
+        console.log('renderItemsFactor update:', renderItemsFactor)
+    }, [renderItemsFactor])
+
     const renderItems = useMemo(() => {
-        return jValues.filter(v => calcVisible(foldKeys, v, showDepth));
-    }, [jValues, showDepth, foldKeys]);
+        console.log('start calc render items')
+        const t = ElapsedTime.start('calc visible items')
+        const r = renderItemsFactor.jValues.filter(v => calcVisible(renderItemsFactor.foldKeys, v, renderItemsFactor.showDepth));
+        t.end()
+        return r;
+    }, [renderItemsFactor]);
 
 
     useEffect(() => {

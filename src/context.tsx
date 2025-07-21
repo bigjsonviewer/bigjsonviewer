@@ -4,7 +4,7 @@ import {VirtuosoHandle} from "react-virtuoso";
 
 
 export type AppContextProps = {
-    treeRef:RefObject<VirtuosoHandle>;
+    treeRef:RefObject<VirtuosoHandle | null>;
     rawSize: number;
     setRawSize: Dispatch<SetStateAction<number>>;
     maxDepth: number;

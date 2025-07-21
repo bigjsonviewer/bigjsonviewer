@@ -9,7 +9,8 @@ import type {UnlistenFn} from "@tauri-apps/api/event";
 import {BaseDirectory, readFile} from "@tauri-apps/plugin-fs";
 import {isApp} from "../utils/isApp.ts";
 import {cn} from "../utils/tailwindcss.ts";
-import { testData2} from "./data.ts";
+import {testData2} from "./data.ts";
+import {ElapsedTime} from "../utils.ts";
 
 
 const {Dragger} = Upload;
@@ -39,11 +40,18 @@ export const DragUploader: FC<{
         setMaxDepth(0);
         setFileError(null);
         try {
+            const t1 = ElapsedTime.start('parse json')
             const obj = JSON.parse(text)
+            t1.end()
+
             const list: JValue[] = [];
             const maxDepth = {maxDepth: 0}
             const size = new Blob([text]).size;
+
+            const t2 = ElapsedTime.start('walk items')
             walkValue(undefined, obj, 0, list, maxDepth);
+            t2.end()
+
             setJValues(list);
             setRawSize(size);
             setMaxDepth(maxDepth.maxDepth);
@@ -53,6 +61,7 @@ export const DragUploader: FC<{
                 maxDepth: maxDepth.maxDepth,
             }, {flags: [Flags.drag_file]})
         } catch (e) {
+            console.error('parse error:', e);
             setFileError(`${e}`);
             triggerEvent(Events.drag_file_failed, {
                 error: `${e}`,

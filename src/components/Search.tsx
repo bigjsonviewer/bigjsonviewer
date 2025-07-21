@@ -10,7 +10,7 @@ const renderHitText = (str: string) => {
 }
 
 export const Search: FC<{
-    inputRef: RefObject<InputRef>,
+    inputRef: RefObject<InputRef | null>,
 }> = ({inputRef}) => {
 
     const {setJValues, treeRef} = useAppContext();
@@ -85,6 +85,7 @@ export const Search: FC<{
     return <div className='w-[450px] flex items-center gap-2'>
         <Input
             ref={inputRef}
+            size={'small'}
             prefix={<Spin spinning={searching} indicator={<LoadingOutlined/>}/>}
             suffix={<div className={'flex items-center gap-2'}>
                 <div>
