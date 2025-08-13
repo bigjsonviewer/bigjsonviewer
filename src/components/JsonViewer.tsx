@@ -7,6 +7,7 @@ import {useAppContext} from "../context.tsx";
 import {ElapsedTime} from "../utils.ts";
 import {cn} from "../utils/tailwindcss.ts";
 import {JSeparator, JType, JValue} from "./types.ts";
+import {useSize} from "ahooks";
 
 
 const calcVisible = (foldKeys: Map<number, boolean>, node: JValue, showDepth: number): boolean => {
@@ -45,6 +46,7 @@ const hasComma = (items: Array<JValue>, i: number) => {
 export const JsonViewer: FC = () => {
 
     const {jValues, showDepth, foldKeys, treeRef, setFoldKeys} = useAppContext();
+    const bodySize = useSize(document.querySelector('body'));
 
 
     const renderItemsFactor = useMemo(() => ({
@@ -83,15 +85,15 @@ export const JsonViewer: FC = () => {
         ref={treeRef}
         totalCount={renderItems.length}
         itemContent={(i) => {
-            return renderItem(renderItems, i)
+            return renderItem(renderItems, i, bodySize?.width || 960)
         }}
     />
 }
 
 
-const renderItem = (renderItems: JValue[], i: number) => {
+const renderItem = (renderItems: JValue[], i: number, maxWidth: number) => {
     const comma = hasComma(renderItems, i);
-    return <RenderItem node={renderItems[i]} comma={comma}/>
+    return <RenderItem node={renderItems[i]} comma={comma} maxWidth={maxWidth}/>
 }
 
 const prepareHoverParentStyle = (id: number | undefined) => {
@@ -162,6 +164,7 @@ const removeCustomStyles = () => {
 const RenderItem: FC<{
     node: JValue,
     comma: boolean,
+    maxWidth: number
 }> = ({node, comma}) => {
 
     const indents = (() => {
@@ -192,7 +195,7 @@ const RenderItem: FC<{
 
     return <div
         className={cn(
-            'h-[24px] w-full px-2 whitespace-nowrap overflow-hidden flex items-center',
+            'h-[24px] px-2 flex items-center',
             `n-${node.id}`,
         )}
         onMouseOver={() => {
@@ -203,7 +206,7 @@ const RenderItem: FC<{
         onMouseLeave={() => removeCustomStyles()}
     >
         {indents}
-        <div className='h-full flex-1'>
+        <div className='h-full flex-1 min-w-0 '>
             {node.separator !== undefined ? <RenderSeparator node={node} hasComma={comma}/> :
                 <RenderValue node={node} hasComma={comma}/>}
         </div>
@@ -260,25 +263,29 @@ const RenderValue: FC<{
     const {foldKeys, setFoldKeys, showDepth} = useAppContext();
     const folded = calcFolded(foldKeys, node, showDepth);
 
-    return <div className='h-full flex flex-1 items-center'>
+    return <div className='h-full flex flex-1 min-w-0 items-center'>
         {[JType.Object, JType.Array].includes(node.type) && <div className='cursor-pointer' onClick={() => {
             toggle(setFoldKeys, node, showDepth);
         }}>{!folded ? <DownOutlined/> : <RightOutlined/>}</div>}
         <div
             className={cn(
-                'flex flex-1 ml-2 items-center justify-between rounded hover:bg-amber-100',
+                'flex flex-1 min-w-0 ml-2 items-center justify-between rounded hover:bg-amber-100',
                 '[&:hover_.copy]:visible',
             )}>
-            <div className='flex flex-1'>
+            <div className='flex flex-1 min-w-0'>
                 {/*<Tag color={'green'}>{node.id}</Tag>*/}
                 {/*<Tag>{node.depth}</Tag>*/}
                 <div className={'mr-2'}><RenderJName node={node}/></div>
-                <RenderJValue node={node}/>
-                {node.type !== JType.Object && node.type !== JType.Array && hasComma && <span>,</span>}
-                {node.type === JType.Object &&
-                    <ObjectStartSigns node={node} expanded={!folded} hasComma={hasComma}/>}
-                {node.type === JType.Array &&
-                    <ArrayStartSigns node={node} expanded={!folded} hasComma={hasComma}/>}
+                <div
+                    className='flex-1 min-w-0 max-w-full overflow-hidden text-ellipsis break-all whitespace-nowrap'>
+                    <RenderJValue node={node}/>
+                    {node.type !== JType.Object && node.type !== JType.Array && hasComma && <span>,</span>}
+                    {node.type === JType.Object &&
+                        <ObjectStartSigns node={node} expanded={!folded} hasComma={hasComma}/>}
+                    {node.type === JType.Array &&
+                        <ArrayStartSigns node={node} expanded={!folded} hasComma={hasComma}/>}
+                </div>
+
             </div>
             <div className={cn(
                 'flex items-center gap-2 text-gray-400',
@@ -298,16 +305,16 @@ const RenderValue: FC<{
 
 const RenderJName: FC<{ node: JValue }> = ({node}) => {
     if (node.searchName) {
-        return <div>
+        return <span>
             {'"'}<span dangerouslySetInnerHTML={{
             __html: node.searchName
         }}/>{'"'}:
-        </div>
+        </span>
     }
     if (node.name) {
-        return <div>
+        return <span>
             {`"${node.name}"`}:
-        </div>
+        </span>
     }
     return <></>
 }
@@ -330,65 +337,66 @@ const RenderJValue: FC<{ node: JValue }> = ({node}) => {
     }
 
     if (node.searchValue) {
-        return <div dangerouslySetInnerHTML={{
+        return <span dangerouslySetInnerHTML={{
             __html: node.searchValue
         }}/>
     }
-    return <div>
+    return <span>
         {node.value}
-    </div>
+    </span>
 }
 
 const RenderJString: FC<{ node: JValue }> = ({node}) => {
     if (node.searchValue) {
-        return <div className='string'>
+        return <span className='string'>
             {'"'}<span dangerouslySetInnerHTML={{
             __html: node.searchValue
         }}/>{'"'}
-        </div>
+        </span>
     }
 
     let value = node.value || '';
-    if (value.length > 100) {
-        value = value.slice(0, 100) + '...'
+    const maxLen = 100;
+    if (value.length > maxLen) {
+        value = value.slice(0, maxLen) + '...'
     }
 
-    return <div className='string'>
+    return <span className='string'>
         {`"${value}"`}
-    </div>
+    </span>
 }
 
 const RenderJNumber: FC<{ node: JValue }> = ({node}) => {
     if (node.searchValue) {
-        return <div className="number" dangerouslySetInnerHTML={{
+        return <span className="number" dangerouslySetInnerHTML={{
             __html: node.searchValue
         }}/>
     }
-    return <div className="number">
+    return <span className="number">
         {node.value}
-    </div>
+    </span>
 }
 
 const RenderJBool: FC<{ node: JValue }> = ({node}) => {
     if (node.searchValue) {
-        return <div className="boolean" dangerouslySetInnerHTML={{
+        return <span className="boolean" dangerouslySetInnerHTML={{
             __html: node.searchValue
         }}/>
     }
-    return <div className="boolean">
+    return <span className="boolean">
         {node.value}
-    </div>
+    </span>
 }
 
 const RenderJNull: FC<{ node: JValue }> = ({node}) => {
     if (node.searchValue) {
-        return <div className="null" dangerouslySetInnerHTML={{
+        return <span className="null" dangerouslySetInnerHTML={{
             __html: node.searchValue
         }}/>
     }
-    return <div className="null">
+    return <span className="null">
         {node.value}
-    </div>
+    </span>
 }
 
 
@@ -401,9 +409,9 @@ const ObjectStartSigns: FC<{
         return <span>{'{'}</span>
     }
     if (node.children!.length === 0) {
-        return <div>{'{}'}{hasComma && <span>,</span>}</div>
+        return <span>{'{}'}{hasComma && <span>,</span>}</span>
     }
-    return <div>{'{ ... }'}{hasComma && <span>,</span>}</div>
+    return <span>{'{ ... }'}{hasComma && <span>,</span>}</span>
 }
 
 const ArrayStartSigns: FC<{
@@ -415,7 +423,7 @@ const ArrayStartSigns: FC<{
         return <span>{'['}</span>
     }
     if (node.children!.length === 0) {
-        return <div>{'[]'}{hasComma && <span>,</span>}</div>
+        return <span>{'[]'}{hasComma && <span>,</span>}</span>
     }
-    return <div>{'[ ... ]'}{hasComma && <span>,</span>}</div>
+    return <span>{'[ ... ]'}{hasComma && <span>,</span>}</span>
 }
