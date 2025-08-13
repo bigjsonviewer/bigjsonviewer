@@ -1,4 +1,5 @@
 import {DownOutlined, RightOutlined} from "@ant-design/icons";
+import {useSize} from "ahooks";
 import {Typography} from "antd";
 import {Dispatch, FC, SetStateAction, useEffect, useMemo} from "react";
 import {Virtuoso} from "react-virtuoso";
@@ -7,7 +8,6 @@ import {useAppContext} from "../context.tsx";
 import {ElapsedTime} from "../utils.ts";
 import {cn} from "../utils/tailwindcss.ts";
 import {JSeparator, JType, JValue} from "./types.ts";
-import {useSize} from "ahooks";
 
 
 const calcVisible = (foldKeys: Map<number, boolean>, node: JValue, showDepth: number): boolean => {
@@ -91,7 +91,7 @@ export const JsonViewer: FC = () => {
 }
 
 
-const renderItem = (renderItems: JValue[], i: number, maxWidth: number) => {
+const renderItem = (renderItems: Array<JValue>, i: number, maxWidth: number) => {
     const comma = hasComma(renderItems, i);
     return <RenderItem node={renderItems[i]} comma={comma} maxWidth={maxWidth}/>
 }
