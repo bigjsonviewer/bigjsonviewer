@@ -264,9 +264,12 @@ const RenderValue: FC<{
     const folded = calcFolded(foldKeys, node, showDepth);
 
     return <div className='h-full flex flex-1 min-w-0 items-center'>
-        {[JType.Object, JType.Array].includes(node.type) && <div className='cursor-pointer' onClick={() => {
+        {[JType.Object, JType.Array].includes(node.type) && <div className={cn('cursor-pointer')} onClick={() => {
             toggle(setFoldKeys, node, showDepth);
-        }}>{!folded ? <DownOutlined/> : <RightOutlined/>}</div>}
+        }}><DownOutlined className={cn(
+            'transition duration-150',
+            folded && 'rotate-[-90deg]'
+        )}/></div>}
         <div
             className={cn(
                 'flex flex-1 min-w-0 ml-2 items-center justify-between rounded hover:bg-amber-100',
