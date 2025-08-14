@@ -1,4 +1,4 @@
-import {DownOutlined, RightOutlined} from "@ant-design/icons";
+import {DownOutlined} from "@ant-design/icons";
 import {useSize} from "ahooks";
 import {Typography} from "antd";
 import {Dispatch, FC, SetStateAction, useEffect, useMemo} from "react";
@@ -11,6 +11,8 @@ import {JSeparator, JType, JValue} from "./types.ts";
 
 
 const calcVisible = (foldKeys: Map<number, boolean>, node: JValue, showDepth: number): boolean => {
+
+    // 如果父节点路径上有节点被折叠了,则不显示
     let parent = node.parent;
     while (parent) {
         if (foldKeys.get(parent.id) === true) {
@@ -19,10 +21,12 @@ const calcVisible = (foldKeys: Map<number, boolean>, node: JValue, showDepth: nu
         parent = parent.parent;
     }
 
+    // 如果父节点被手动设置打开了，则显示
     if (node.parent && foldKeys.get(node.parent.id) === false) {
         return true
     }
 
+    // 根据 show depth 来显示
     return showDepth === -1 || (!node.parent || node.parent.depth <= showDepth)
 }
 
