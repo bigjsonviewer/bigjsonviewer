@@ -7,7 +7,7 @@ export const testData = `{
       "remaining": 1474668,
       "refund": 0
     }
-}`;
+}`
 
 export const testData2 = `[
   {

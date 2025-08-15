@@ -49,15 +49,15 @@ const hasComma = (items: Array<JValue>, i: number) => {
 
 export const JsonViewer: FC = () => {
 
-    const {jValues, showDepth, foldKeys, treeRef, setFoldKeys} = useAppContext();
+    const {jValues, showDepth, foldedKeys, treeRef, setFoldedKeys} = useAppContext();
     const bodySize = useSize(document.querySelector('body'));
 
 
     const renderItemsFactor = useMemo(() => ({
         jValues,
         showDepth,
-        foldKeys,
-    }), [jValues, showDepth, foldKeys]);
+        foldKeys: foldedKeys,
+    }), [jValues, showDepth, foldedKeys]);
 
 
     const renderItems = useMemo(() => {
@@ -71,8 +71,8 @@ export const JsonViewer: FC = () => {
 
     // 清理无需缓存的 key
     useEffect(() => {
-        if (foldKeys.size > 1000) {
-            setFoldKeys((prev) => {
+        if (foldedKeys.size > 1000) {
+            setFoldedKeys((prev) => {
                 for (const id of prev.keys()) {
                     if (showDepth === -1 || jValues[id].depth > showDepth) {
                         prev.delete(id);
@@ -81,7 +81,7 @@ export const JsonViewer: FC = () => {
                 return new Map(prev)
             })
         }
-    }, [showDepth, jValues, foldKeys, setFoldKeys])
+    }, [showDepth, jValues, foldedKeys, setFoldedKeys])
 
 
     return <Virtuoso<JValue>
@@ -264,12 +264,12 @@ const RenderValue: FC<{
     node: JValue
     hasComma?: boolean,
 }> = ({node, hasComma}) => {
-    const {foldKeys, setFoldKeys, showDepth} = useAppContext();
-    const folded = calcFolded(foldKeys, node, showDepth);
+    const {foldedKeys, setFoldedKeys, showDepth} = useAppContext();
+    const folded = calcFolded(foldedKeys, node, showDepth);
 
     return <div className='h-full flex flex-1 min-w-0 items-center'>
         {[JType.Object, JType.Array].includes(node.type) && <div className={cn('cursor-pointer')} onClick={() => {
-            toggle(setFoldKeys, node, showDepth);
+            toggle(setFoldedKeys, node, showDepth);
         }}><DownOutlined className={cn(
             'transition duration-150',
             folded && 'rotate-[-90deg]'

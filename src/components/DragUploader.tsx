@@ -11,7 +11,7 @@ import {Events, Flags, triggerEvent} from "../events.ts";
 import {ElapsedTime} from "../utils.ts";
 import {isApp} from "../utils/isApp.ts";
 import {cn} from "../utils/tailwindcss.ts";
-import {testData2} from "./data.ts";
+// import {testData2} from "./data.ts";
 import {JValue, walkValue} from "./types.ts";
 
 
@@ -33,7 +33,7 @@ export const DragUploader: FC<{
 
 
     const [dragging, setDragging] = useState(false);
-    const {setJValues, setRawSize, setMaxDepth, setFileError} = useAppContext()
+    const {setJValues, setRawSize, setMaxDepth, setFileError, setFilename} = useAppContext()
 
     const setData = useCallback((text: string) => {
         setDragging(false);
@@ -73,7 +73,7 @@ export const DragUploader: FC<{
 
     useEffect(() => {
         if (!import.meta.env.PROD) {
-            setData(testData2);
+            // setData(testData2);
         }
         if (!isApp()) {
             return
@@ -141,8 +141,10 @@ export const DragUploader: FC<{
                 if (!file) {
                     return
                 }
+
                 void (async () => {
                     setData(await file.text())
+                    setFilename(file.name)
                 })()
             }}>
                 {children}

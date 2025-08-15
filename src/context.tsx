@@ -7,6 +7,8 @@ import {JValue} from "./components/types.ts";
 export type AppContextProps = {
     treeRef: RefObject<VirtuosoHandle>;
     rawSize: number;
+    filename: string;
+    setFilename: Dispatch<SetStateAction<string>>;
     setRawSize: Dispatch<SetStateAction<number>>;
     maxDepth: number;
     setMaxDepth: Dispatch<SetStateAction<number>>;
@@ -14,8 +16,8 @@ export type AppContextProps = {
     setJValues: Dispatch<SetStateAction<Array<JValue>>>;
     showDepth: number;
     setShowDepth: Dispatch<SetStateAction<number>>;
-    foldKeys: Map<number, boolean>;
-    setFoldKeys: Dispatch<SetStateAction<Map<number, boolean>>>;
+    foldedKeys: Map<number, boolean>;
+    setFoldedKeys: Dispatch<SetStateAction<Map<number, boolean>>>;
     fileError: string | null;
     setFileError: Dispatch<SetStateAction<string | null>>;
 }
